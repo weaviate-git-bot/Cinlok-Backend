@@ -4,6 +4,16 @@
 
 ## Getting started
 
+======================
+
+Install it first: `pnpm i`
+
+Development Server (with nodemon): `pnpm dev` (warning: no type check because `swc`, make sure no error when doing build with `pnpm build`)
+
+Production Server: `pnpm build` and then `pnpm start`
+
+======================
+
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
 Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
