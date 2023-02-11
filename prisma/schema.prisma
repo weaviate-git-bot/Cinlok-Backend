@@ -9,3 +9,81 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+enum SexType {
+  MALE
+  FEMALE
+}
+
+model User {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.LongText
+  description String      @db.LongText
+  dateOfBirth DateTime
+  latitude    Float
+  longitude   Float
+  sex         SexType
+  account     Account?
+  userPhoto   UserPhoto[]
+  userTag     UserTag[]
+  pair        Pair[]      @relation("user")
+  pairedUser  Pair[]      @relation("pairedUser")
+  match       Match[]     @relation("user1")
+  matchedUser Match[]     @relation("user2")
+}
+
+model Account {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  username String @unique
+  password String
+  salt     String
+  user     User   @relation(fields: [userId], references: [id])
+  userId   Int    @unique
+}
+
+model UserPhoto {
+  id     Int    @id @default(autoincrement())
+  url    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
+  @@unique([userId, url])
+}
+
+model Tag {
+  id      Int       @id @default(autoincrement())
+  tag     String    @unique
+  UserTag UserTag[]
+}
+
+model UserTag {
+  id     Int  @id @default(autoincrement())
+  tag    Tag  @relation(fields: [tagId], references: [id])
+  tagId  Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Pair {
+  userId     Int
+  pairedId   Int
+  hasMatched Boolean  @default(false)
+  timestamp  DateTime
+
+  user       User @relation("user", fields: [userId], references: [id])
+  pairedUser User @relation("pairedUser", fields: [pairedId], references: [id])
+
+  @@id([userId, pairedId, timestamp])
+}
+
+model Match {
+  userId1   Int
+  userId2   Int
+  timestamp DateTime
+
+  user1 User @relation("user1", fields: [userId1], references: [id])
+  user2 User @relation("user2", fields: [userId2], references: [id])
+
+  // people can match multiple times
+  @@id([userId1, userId2, timestamp])
+}

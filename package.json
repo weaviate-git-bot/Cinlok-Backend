@@ -8,10 +8,14 @@
     "dev": "nodemon -L --watch src --ext ts --exec ts-node --project tsconfig.json src/server.ts",
     "start": "node dist/server.js"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@swc/core": "^1.3.34",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/node": "^18.13.0",
