@@ -2,6 +2,8 @@ import Fastify, { FastifyRequest, FastifyReply } from "fastify";
 import FastifyCors from "@fastify/cors";
 import FastifyJWT from "@fastify/jwt";
 
+import * as registerRoutes from "./route";
+
 export const server = Fastify();
 
 declare module "fastify" {
@@ -49,6 +51,9 @@ server.decorate(
 server.get("/healthcheck", async function () {
     return { status: "OK" };
 });
+
+// Register routes
+Object.values(registerRoutes).forEach((route) => route(server));
 
 async function main() {
     try {
