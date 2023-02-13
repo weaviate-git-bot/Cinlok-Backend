@@ -1,5 +1,2 @@
-import * as adminController from './admin';
-
-export {
-  adminController,
-};
+export * as adminController from './admin';
+export * as authController from './auth';

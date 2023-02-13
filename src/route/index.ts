@@ -1,5 +1,4 @@
-import registerAdminRoute from "./admin";
+import * as AdminRoute from "./admin";
+import * as AuthRoute from "./auth";
 
-export {
-  registerAdminRoute,
-}
+export { AdminRoute, AuthRoute };

@@ -1,65 +1,34 @@
-import Fastify, { FastifyRequest, FastifyReply } from "fastify";
-import FastifyCors from "@fastify/cors";
-import FastifyJWT from "@fastify/jwt";
+import express, { Express, Router } from "express";
+import cors from "cors"
+import * as routes from "./route";
+import ErrorHandler from "./middleware/error-handler";
+import Serializer from "./middleware/serializer";
 
-import * as registerRoutes from "./route";
+import dotenv from "dotenv";
 
-export const server = Fastify();
+dotenv.config();
 
-declare module "fastify" {
-    export interface FastifyInstance {
-        authenticate: any;
-    }
-}
-
-declare module "@fastify/jwt" {
-    interface FastifyJWT {
-        user: {
-            user_id: number;
-            email: string;
-            username: string;
-            name: string;
-            isAdmin: boolean;
-        };
-    }
-}
-
-server.register(FastifyJWT, {
-    secret: "theonlysecret",
-    sign: {
-        expiresIn: "2h",
-    }
-});
+const server: Express = express();
 
 // Allow CORS
-server.register(FastifyCors, {
-    origin: true,
-    credentials: true,
-});
+server.use(cors())
 
-server.decorate(
-    "authenticate",
-    async (request: FastifyRequest, reply: FastifyReply) => {
-        try {
-            await request.jwtVerify();
-        } catch (e) {
-            return reply.send(e);
-        }
-    }
-);
-
-server.get("/healthcheck", async function () {
-    return { status: "OK" };
-});
+server.use(Serializer)
 
 // Register routes
-Object.values(registerRoutes).forEach((route) => route(server));
+Object.keys(routes).forEach((routeName) => {
+    const route: Router = (routes as any)[routeName]["default"];
+    server.use(`/${routeName.replace("Route", "").toLowerCase()}`, route);
+});
+
+// Error handler
+server.use(ErrorHandler);
 
 async function main() {
     try {
-        await server.listen({ host: "0.0.0.0", port: 3000 });
-
-        console.log(`Server ready at http://localhost:3000`);
+        server.listen(3000, () => {
+            console.log(`Server ready at http://localhost:3000`);
+        })
     } catch (e) {
         console.error(e);
         process.exit(1);

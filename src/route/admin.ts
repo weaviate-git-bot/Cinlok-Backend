@@ -1,9 +1,7 @@
-import type { FastifyInstance } from "fastify";
-
+import { Router } from "express"
 import { adminController } from "../controller";
 
-const registerAdminRoute = (server: FastifyInstance) => {
-  server.get("/admin/users", adminController.getAllUser);
-};
+const AdminRoute = Router();
+AdminRoute.get("/users", adminController.getAllUser)
 
-export default registerAdminRoute;
+export default AdminRoute;
