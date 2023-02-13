@@ -70,11 +70,11 @@ const main = async () => {
 
       const account = await prisma.account.create({
         data: {
+          id: user.id,
           email: u.email,
           username: u.username,
           password: u.password,
           salt: u.salt,
-          userId: user.id,
         },
       });
 
