@@ -1,13 +1,13 @@
 import type { PrismaClient, Account } from "@prisma/client";
-import prisma from "../repository";
+import context, { IContext } from "../context";
 import bcrypt from "bcrypt";
 import { LoginError } from "../error";
 
 class AccountUseCase {
   private prisma: PrismaClient;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
+  constructor(context: IContext) {
+    this.prisma = context.prisma;
   }
 
   async login(username: string, password: string): Promise<Account> {
@@ -28,4 +28,5 @@ class AccountUseCase {
   }
 }
 
-export default new AccountUseCase(prisma);
+export default new AccountUseCase(context);
+export { AccountUseCase };

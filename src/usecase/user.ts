@@ -1,13 +1,12 @@
-import type { PrismaClient, Prisma } from "@prisma/client";
-import prisma from "../repository";
-
-
+import type { PrismaClient } from "@prisma/client";
+// import prisma from "../repository";
+import context, { IContext } from "../context";
 
 class UserUseCase {
   private prisma: PrismaClient;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
+  constructor(context: IContext) {
+    this.prisma = context.prisma;
   }
 
   async getAll() {
@@ -23,4 +22,5 @@ class UserUseCase {
   }
 }
 
-export default new UserUseCase(prisma);
+export default new UserUseCase(context);
+export { UserUseCase };
