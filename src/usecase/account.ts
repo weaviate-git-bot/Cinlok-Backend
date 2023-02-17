@@ -26,6 +26,50 @@ class AccountUseCase {
 
     throw new LoginError();
   }
+
+  async register(email: string, username: string, password: string, confirmPassword: string): Promise<boolean> {
+    if (password !== confirmPassword) {
+      return false;
+    }
+    
+    // check valid email
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    if (!emailRegex.test(email)) {
+      return false;
+    }
+
+    // check unique email and username
+    const account = await this.ctx.prisma.account.findFirst({
+      where: {
+        OR: [
+          {
+            email,
+          },
+          {
+            username,
+          },
+        ],
+      },
+    });
+
+    if (account) {
+      return false;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    await this.ctx.prisma.account.create({
+      data: {
+        email,
+        username,
+        password: hash,
+        salt,
+      },
+    });
+
+    return true;
+  }
 }
 
 export default new AccountUseCase(context);
