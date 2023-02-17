@@ -1,16 +1,14 @@
-import type { PrismaClient } from "@prisma/client";
-// import prisma from "../repository";
 import context, { IContext } from "../context";
 
 class UserUseCase {
-  private prisma: PrismaClient;
+  private ctx: IContext;
 
   constructor(context: IContext) {
-    this.prisma = context.prisma;
+    this.ctx = context;
   }
 
   async getAll() {
-    return this.prisma.user.findMany({
+    return this.ctx.prisma.user.findMany({
       include: {
         userPhoto: true,
         userTag: true,

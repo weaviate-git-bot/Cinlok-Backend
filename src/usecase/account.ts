@@ -1,17 +1,17 @@
-import type { PrismaClient, Account } from "@prisma/client";
+import type { Account } from "@prisma/client";
 import context, { IContext } from "../context";
 import bcrypt from "bcrypt";
 import { LoginError } from "../error";
 
 class AccountUseCase {
-  private prisma: PrismaClient;
+  private ctx: IContext;
 
   constructor(context: IContext) {
-    this.prisma = context.prisma;
+    this.ctx = context;
   }
 
   async login(username: string, password: string): Promise<Account> {
-    const account = await this.prisma.account.findUnique({
+    const account = await this.ctx.prisma.account.findUnique({
       where: {
         username,
       },
