@@ -13,6 +13,8 @@ const server: Express = express();
 // Allow CORS
 server.use(cors())
 
+server.use(express.json())
+
 server.use(Serializer)
 
 // Register routes
