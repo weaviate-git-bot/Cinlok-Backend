@@ -1,7 +1,7 @@
 import type { Account } from "@prisma/client";
 import context, { IContext } from "../context";
 import bcrypt from "bcrypt";
-import { LoginError } from "../error";
+import { LoginError, RegisterError } from "../error";
 
 class AccountUseCase {
   private ctx: IContext;
@@ -27,10 +27,7 @@ class AccountUseCase {
     throw new LoginError();
   }
 
-  async register(email: string, username: string, password: string, confirmPassword: string): Promise<boolean> {
-    if (password !== confirmPassword) {
-      return false;
-    }
+  async register(email: string, username: string, password: string): Promise<boolean> {
     
     // check valid email
     const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -53,7 +50,7 @@ class AccountUseCase {
     });
 
     if (account) {
-      return false;
+      throw new RegisterError();
     }
 
     const salt = await bcrypt.genSalt(10);
