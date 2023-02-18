@@ -16,6 +16,11 @@ enum SexType {
   FEMALE
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
 model User {
   id          Int         @id @default(autoincrement())
   name        String      @db.LongText
@@ -39,6 +44,7 @@ model Account {
   username String @unique
   password String
   salt     String
+  role     Role   @default(USER)
   user     User   @relation(fields: [id], references: [id])
 }
 
