@@ -8,7 +8,7 @@
     "dev": "nodemon -L --watch src --ext ts --exec ts-node --project tsconfig.json src/server.ts",
     "postinstall": "prisma generate",
     "start": "node dist/server.js",
-    "test": "ts-jest"
+    "test": "jest"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
