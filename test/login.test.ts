@@ -1,6 +1,7 @@
 import { IMockContext, createMockContext } from "./context";
 import type { IContext } from "../src/context";
 import { AccountUseCase } from "../src/usecase/account";
+import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { LoginError } from "../src/error";
 
@@ -26,6 +27,7 @@ test("should login successfully", async () => {
     email: "malik@gmail.com",
     username: "malik",
     password: hashedPassword,
+    role: Role.USER,
     salt,
   };
 
@@ -52,6 +54,7 @@ test("should throw error when password is incorrect failed", async () => {
     email: "malik@gmail.com",
     username: "malik",
     password: hashedPassword + "1", // wrong password
+    role: Role.USER,
     salt,
   };
 
