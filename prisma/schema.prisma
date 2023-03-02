@@ -72,6 +72,7 @@ model UserTag {
 }
 
 model Pair {
+  id         Int      @id @default(autoincrement())
   userId     Int
   pairedId   Int
   hasMatched Boolean  @default(false)
@@ -79,18 +80,14 @@ model Pair {
 
   user       User @relation("user", fields: [userId], references: [id])
   pairedUser User @relation("pairedUser", fields: [pairedId], references: [id])
-
-  @@id([userId, pairedId, timestamp])
 }
 
 model Match {
+  id        Int      @id @default(autoincrement())
   userId1   Int
   userId2   Int
   timestamp DateTime
 
   user1 User @relation("user1", fields: [userId1], references: [id])
   user2 User @relation("user2", fields: [userId2], references: [id])
-
-  // people can match multiple times
-  @@id([userId1, userId2, timestamp])
 }
