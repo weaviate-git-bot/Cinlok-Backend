@@ -1,33 +1,40 @@
 import { PrismaClient, SexType } from "@prisma/client";
 import { faker } from "@faker-js/faker";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
-const generatedTags = [
+const dirtyGeneratedTags = [
   ...new Set(
     Array(10)
       .fill({})
       .map(() => {
-        return faker.music.genre();
+        return faker.lorem.word();
       })
   ),
 ];
 
-const generatedUsers = Array(10)
+const generatedTags = Array.from(new Set(dirtyGeneratedTags));
+
+const promiseGeneratedUsers = Array(10)
   .fill({})
-  .map(() => {
+  .map(async () => {
     const sex = Math.random() > 0.5 ? SexType.MALE : SexType.FEMALE;
     const photos = Array(5)
       .fill({})
       .map(() => {
         return faker.image.imageUrl() + "/" + faker.random.numeric(5);
       });
+    
+    const password = "password";
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
 
     return {
       email: faker.internet.email(),
       username: faker.internet.userName(),
-      password: faker.internet.password(),
-      salt: faker.internet.password(),
+      password: hash,
+      salt,
       name: faker.name.firstName(),
       description: faker.lorem.paragraph(),
       dateOfBirth: faker.date.birthdate(),
@@ -38,7 +45,22 @@ const generatedUsers = Array(10)
     };
   });
 
+const clearDB = () => {
+  return prisma.$transaction([
+    prisma.userTag.deleteMany({}),
+    prisma.tag.deleteMany({}),
+    prisma.userPhoto.deleteMany({}),
+    prisma.account.deleteMany({}),
+    prisma.pair.deleteMany({}),
+    prisma.match.deleteMany({}),
+    prisma.user.deleteMany({}),
+  ]);
+}
+
 const main = async () => {
+  console.log(`Clearing Database ...`);
+  clearDB();
+
   console.log(`Start seeding ...`);
 
   const createdTags = await Promise.all(
@@ -53,6 +75,8 @@ const main = async () => {
       return createdTag;
     })
   );
+
+  const generatedUsers = await Promise.all(promiseGeneratedUsers);
 
   const createdUsers = await Promise.all(
     generatedUsers.map(async (u) => {

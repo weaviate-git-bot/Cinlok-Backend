@@ -3,8 +3,17 @@ import prisma from "../repository";
 
 export interface IContext {
   prisma: PrismaClient;
+  isMock: boolean;
 };
 
-export default {
+const ctx = {
   prisma,
+  isMock: false,
 }
+
+export const setCtx = (context: IContext) => {
+  ctx.prisma = context.prisma;
+  ctx.isMock = context.isMock;
+}
+
+export default ctx;

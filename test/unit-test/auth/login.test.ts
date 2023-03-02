@@ -1,9 +1,9 @@
-import { IMockContext, createMockContext } from "./context";
-import type { IContext } from "../src/context";
-import { AccountUseCase } from "../src/usecase/account";
+import { IMockContext, createMockContext } from "../../context";
+import type { IContext } from "../../../src/context";
+import { AccountUseCase } from "../../../src/usecase/account";
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { LoginError } from "../src/error";
+import { LoginError } from "../../../src/error";
 
 let mockCtx: IMockContext;
 let ctx: IContext;
