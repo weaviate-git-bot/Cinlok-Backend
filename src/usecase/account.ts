@@ -2,6 +2,7 @@ import type { Account } from "@prisma/client";
 import context, { IContext } from "../context";
 import bcrypt from "bcrypt";
 import { LoginError, RegisterError } from "../error";
+import jwt from "../lib/jwt";
 
 class AccountUseCase {
   private ctx: IContext;
@@ -10,7 +11,7 @@ class AccountUseCase {
     this.ctx = context;
   }
 
-  async login(username: string, password: string): Promise<Account> {
+  async login(username: string, password: string): Promise<string> {
     const account = await this.ctx.prisma.account.findUnique({
       where: {
         username,
@@ -20,53 +21,99 @@ class AccountUseCase {
     if (account) {
       const hash = await bcrypt.hash(password, account.salt);
       if (hash === account.password) {
-        return account;
+        const token = jwt.sign({
+          id: account.id,
+        })
+        return token;
       }
     }
 
     throw new LoginError();
   }
 
-  async register(email: string, username: string, password: string): Promise<boolean> {
-    
-    // check valid email
-    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    if (!emailRegex.test(email)) {
-      return false;
-    }
-
-    // check unique email and username
-    const account = await this.ctx.prisma.account.findFirst({
+  async isUniqueUsername(username: string): Promise<boolean> {
+    const account = await this.ctx.prisma.account.findUnique({
       where: {
-        OR: [
-          {
-            email,
-          },
-          {
-            username,
-          },
-        ],
+        username,
       },
     });
 
-    if (account) {
-      throw new RegisterError();
-    }
+    return !account;
+  }
 
+  async isUniqueEmail(email: string): Promise<boolean> {
+    const account = await this.ctx.prisma.account.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    return !account;
+  }
+
+  async register(email: string, username: string, password: string) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    await this.ctx.prisma.account.create({
+    if (!await this.isUniqueEmail(email) || !await this.isUniqueUsername(username)) {
+      throw new RegisterError()
+    }
+
+    return await this.ctx.prisma.$transaction(async (tx) => {
+      const account = await tx.account.create({
+        data: {
+          email,
+          username,
+          password: hash,
+          salt,
+        },
+      });
+
+      await tx.user.create({
+        data: {
+          id: account.id,
+          name: "",
+          description: "",
+          dateOfBirth: new Date(),
+          latitude: 0,
+          longitude: 0,
+          sex: "MALE",
+          profileUrl: "",
+        },
+      });
+
+      return {
+        email: account.email,
+        username: account.username,
+      };
+    });
+  }
+
+  async updateAccount(id: number, data: any): Promise<Account> {
+    const { username } = data;
+
+    const newAccount = await this.ctx.prisma.account.update({
+      where: {
+        id,
+      },
       data: {
-        email,
         username,
-        password: hash,
-        salt,
       },
     });
 
-    return true;
+    return newAccount;
   }
+
+  async getUserById(id: number): Promise<Account | null> {
+    const account = await this.ctx.prisma.account.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return account;
+  }
+
 }
 
 export default new AccountUseCase(context);
