@@ -13,9 +13,8 @@ export const updateProfileSchema = z.object({
 
 export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>
 
-export const updateProfilePhotoSchema = z.object({
-    photoUrl: z.string().optional(),
-    userPhoto: z.array(z.string()).optional(),
-})
+// Key format "photo_{i}" i is 0 to 3 (inclusive)
+const photoKey = z.string().regex(/^photo_[0-3]$/)
+export const updateProfilePhotoSchema = z.record(photoKey, z.any())
 
 export type UpdateProfilePhotoSchema = z.infer<typeof updateProfilePhotoSchema>
