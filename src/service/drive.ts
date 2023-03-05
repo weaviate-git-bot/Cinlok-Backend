@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 const oAuth2Client = new GoogleAuth({
   credentials: {
     client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
   },
   scopes: ['https://www.googleapis.com/auth/drive.file'],
 });
@@ -55,10 +55,10 @@ const getFiles = async (folderName: FolderName) => {
   return res.data.files;
 };
 
-const driveService = {
+const DriveService = {
   uploadFile,
   deleteFile,
   getFiles,
   folderNames: Object.keys(folders) as [FolderName, ...FolderName[]],
 }
-export default driveService;
+export default DriveService;

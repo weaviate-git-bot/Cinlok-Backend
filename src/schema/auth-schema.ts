@@ -8,9 +8,9 @@ export const loginSchema = z.object({
 export type LoginSchema = z.infer<typeof loginSchema>
 
 export const registerSchema = z.object({
-  email : z.string(),
-  username : z.string(),
-  password : z.string()
+  email: z.string().email(),
+  username: z.string(),
+  password: z.string()
 })
 
 export type RegisterSchema = z.infer<typeof registerSchema>

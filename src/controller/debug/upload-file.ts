@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { AsyncRoute } from "../../middleware/async-wrapper";
-import driveService from "../../service/drive"
+import DriveService from "../../service/drive"
 import { BadRequestError } from "../../error/client-error";
 import { uploadFileSchema } from "../../schema/debug-schema";
 
@@ -12,7 +12,7 @@ export const uploadFile = AsyncRoute(
       throw new BadRequestError("File is required")
     }
 
-    const fileId = await driveService.uploadFile(file, folderName, filename);
+    const fileId = await DriveService.uploadFile(file, folderName, filename);
 
     res.send({
       message: "Upload file success",

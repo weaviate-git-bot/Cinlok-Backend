@@ -40,6 +40,7 @@ const promiseGeneratedUsers = Array(10)
       dateOfBirth: faker.date.birthdate(),
       latitude: faker.address.latitude(),
       longitude: faker.address.longitude(),
+      profileUrl: faker.image.imageUrl(),
       sex,
       photos,
     };
@@ -89,6 +90,7 @@ const main = async () => {
           latitude: parseFloat(u.latitude),
           longitude: parseFloat(u.longitude),
           sex: u.sex,
+          profileUrl: u.profileUrl,
         },
       });
 

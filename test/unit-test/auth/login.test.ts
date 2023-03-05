@@ -4,6 +4,7 @@ import { AccountUseCase } from "../../../src/usecase/account";
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { LoginError } from "../../../src/error";
+import jwt from "../../../src/lib/jwt";
 
 let mockCtx: IMockContext;
 let ctx: IContext;
@@ -35,9 +36,13 @@ test("should login successfully", async () => {
 
   const accountUseCase = new AccountUseCase(ctx);
 
+  const token = jwt.sign({
+    id: account.id,
+  })
+
   await expect(
     accountUseCase.login(loginReq.username, loginReq.password)
-  ).resolves.toEqual(account);
+  ).resolves.toEqual(token);
 });
 
 test("should throw error when password is incorrect failed", async () => {
