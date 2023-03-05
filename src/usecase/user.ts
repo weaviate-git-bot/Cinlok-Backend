@@ -2,6 +2,7 @@ import type { User } from "@prisma/client";
 import context, { IContext } from "../context";
 import { BadRequestError } from "../error/client-error";
 import { InternalServerError } from "../error/server-error";
+import type { UpdateProfilePhotoSchema } from "../schema";
 import AccountUseCase from "../usecase/account";
 
 class UserUseCase {
@@ -107,14 +108,61 @@ class UserUseCase {
     return user;
   }
 
-  async updateProfilePhoto(id: number, data: any): Promise<Boolean> {
-    const { photoUrl, userPhoto } = data;
-    if (await this.getUserById(id)) {
+  async updateProfilePhoto(id: number, files: UpdateProfilePhotoSchema) {
+    const user = await this.getUserById(id);
+    if (!user) {
       throw new BadRequestError("User not found")
     }
-    console.log(photoUrl);
-    console.log(userPhoto);
-    return true;
+
+    for (const key of Object.keys(files)) {
+      if (files[key].length !== 1) {
+        delete files[key];
+      }
+    }
+
+    const oldPhotos = await this.ctx.prisma.userPhoto.findMany({
+      where: {
+        userId: id,
+      },
+    });
+
+    const userPhotos = Object.keys(files).map(async (key) => {
+      // id is last character of key
+      const idx = parseInt(key[key.length - 1] as string);
+
+      // Get oldFileId from oldPhotos url, it's using google drive url
+      const oldFileId = oldPhotos.find((photo) => photo.index === idx)?.fileId;
+      // delete old file from google drive
+      if (oldFileId) {
+        this.ctx.drive.deleteFile(oldFileId);
+      }
+
+      // Upload new file to google drive
+      const fileId = await this.ctx.drive.uploadFile(files[key][0], "photos", `${user.id}-${idx}`);
+
+      if (!fileId) {
+        throw new InternalServerError("Upload file failed");
+      }
+
+      return this.ctx.prisma.userPhoto.upsert({
+        where: {
+          userId_index: {
+            userId: user.id,
+            index: idx,
+          },
+        },
+        update: {
+          fileId,
+        },
+        create: {
+          fileId,
+          userId: user.id,
+          index: idx,
+        },
+      });
+    });
+
+    return await Promise.all(userPhotos);
   }
 }
 

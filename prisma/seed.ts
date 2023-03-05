@@ -25,7 +25,7 @@ const promiseGeneratedUsers = Array(10)
       .map(() => {
         return faker.image.imageUrl() + "/" + faker.random.numeric(5);
       });
-    
+
     const password = "password";
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
@@ -128,11 +128,12 @@ const main = async () => {
       );
 
       const photos = await Promise.all(
-        u.photos.map(async (photo) => {
+        u.photos.map(async (photo, i) => {
           const createdPhoto = await prisma.userPhoto.create({
             data: {
-              url: photo,
+              fileId: photo,
               userId: user.id,
+              index: i,
             },
           });
           return createdPhoto;
