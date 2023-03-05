@@ -79,14 +79,27 @@ class UserUseCase {
         },
       });
 
-      // Create userTag if not exist
-      await this.ctx.prisma.userTag.createMany({
-        data: validTags.map((tag) => ({
-          tagId: tag.id,
-          userId: id,
-        })),
-        skipDuplicates: true,
+      // Delete userTag if not in  validTags
+      await this.ctx.prisma.$transaction(async (tx) => {
+        await tx.userTag.deleteMany({
+          where: {
+            userId: id,
+          },
+        });
+
+        // Create userTag if not exist
+        await tx.userTag.createMany({
+          data: validTags.map((tag) => ({
+            tagId: tag.id,
+            userId: id,
+          })),
+          skipDuplicates: true,
+        })
       })
+
+
+      // Update vector in mixer service
+      this.ctx.mixer.upsertUser(`${id}`, validTags.map((tag) => tag.tag));
     }
 
     const user = await this.ctx.prisma.user.update({

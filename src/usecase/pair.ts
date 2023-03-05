@@ -1,6 +1,9 @@
 import context, { IContext } from "../context";
+import MixerService from "../service/mixer";
 import { GDate } from "../utils";
 import matchUseCase from "./match";
+
+// const PAIR_REFRESH_TIME = 60 * 60 * 1000;
 
 class PairUseCase {
   private ctx: IContext;
@@ -39,6 +42,55 @@ class PairUseCase {
     });
 
     return pair;
+  }
+
+  async get(userId: number) {
+    // TODO: Implement omit by cache
+
+    const oldPairs = await this.ctx.prisma.pair.findMany({
+      where: {
+        userId,
+      },
+    }).then((pairs) => pairs.map((p) => p.userId));
+
+    const oldMatches = await this.ctx.prisma.match.findMany({
+      where: {
+        OR: [
+          {
+            userId1: userId,
+          },
+          {
+            userId2: userId,
+          },
+        ],
+      },
+    }).then((matches) => matches.map((m) => m.userId1).concat(matches.map((m) => m.userId2)));
+
+    const omit = oldPairs.concat(oldMatches);
+
+    const nearest = await MixerService.getNearest(userId, 10, omit);
+
+    const nearestUsers = await this.ctx.prisma.user.findMany({
+      where: {
+        id: {
+          in: nearest,
+        },
+      },
+      include: {
+        userPhoto: {
+          select: {
+            fileId: true,
+          }
+        },
+        userTag: {
+          include: {
+            tag: true,
+          }
+        }
+      }
+    });
+
+    return nearestUsers;
   }
 }
 
