@@ -10,7 +10,8 @@ const upsertUser = async (userId: string, words: string[]) => {
     words.push('person');
   }
   const { data } = await mixerApi.put(`/user/${userId}`, {
-    words
+    words,
+    channel: 'public'
   });
 
   return data;
@@ -21,7 +22,8 @@ const getNearest = async (userId: number, n: number, omit: number[]) => {
     params: {
       id: userId,
       n,
-      omit: omit.join(',')
+      omit: omit.join(','),
+      channel: 'public'
     }
   })
 

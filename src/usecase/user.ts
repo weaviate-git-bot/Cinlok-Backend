@@ -177,6 +177,41 @@ class UserUseCase {
 
     return await Promise.all(userPhotos);
   }
+
+  async deleteProfilePhoto(id: number, index: number[]) {
+    const user = await this.getUserById(id);
+    if (!user) {
+      throw new BadRequestError("User not found")
+    }
+
+    const photos = await this.ctx.prisma.userPhoto.findMany({
+      where: {
+        userId: id,
+      },
+    });
+
+    const userPhotos = await this.ctx.prisma.$transaction(async (tx) => {
+      const result = await tx.userPhoto.deleteMany({
+        where: {
+          userId: id,
+          index: {
+            in: index,
+          },
+        },
+      });
+
+      // Delete file from google drive
+      photos.forEach((photo) => {
+        if (index.includes(photo.index)) {
+          this.ctx.drive.deleteFile(photo.fileId);
+        }
+      });
+
+      return result;
+    });
+
+    return userPhotos;
+  }
 }
 
 export default new UserUseCase(context);
