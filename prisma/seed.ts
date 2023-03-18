@@ -127,25 +127,11 @@ const main = async () => {
         })
       );
 
-      const photos = await Promise.all(
-        u.photos.map(async (photo, i) => {
-          const createdPhoto = await prisma.userPhoto.create({
-            data: {
-              fileId: photo,
-              userId: user.id,
-              index: i,
-            },
-          });
-          return createdPhoto;
-        })
-      );
-
       console.log(`Created user with id: ${user.id}`);
       return {
         user,
         account,
         tags,
-        photos,
       };
     })
   );

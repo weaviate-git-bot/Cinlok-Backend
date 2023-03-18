@@ -41,10 +41,16 @@ const uploadFile = async (file: Express.Multer.File, folderName: FolderName, fil
 };
 
 const deleteFile = async (fileId: string) => {
-  const res = await service.files.delete({
-    fileId: fileId,
-  });
-  return res.data;
+  try {
+    const res = await service.files.delete({
+      fileId: fileId,
+    });
+    return res.data;
+  } catch (err) {
+    // Sometimes, the file is not found, so we just ignore it
+    console.log(err);
+    return null;
+  }
 };
 
 const getFiles = async (folderName: FolderName) => {

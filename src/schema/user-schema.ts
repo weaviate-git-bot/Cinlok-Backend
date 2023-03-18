@@ -18,3 +18,15 @@ const photoKey = z.string().regex(/^photo_[0-3]$/)
 export const updateProfilePhotoSchema = z.record(photoKey, z.any())
 
 export type UpdateProfilePhotoSchema = z.infer<typeof updateProfilePhotoSchema>
+
+export const deleteProfilePhotoSchema = z.object({
+    index: z.array(z.number().min(0).max(3))
+})
+
+export type DeleteProfilePhotoSchema = z.infer<typeof deleteProfilePhotoSchema>
+
+export const getProfileQuerySchema = z.object({
+    userId: z.string().nonempty().transform((s) => parseInt(s))
+})
+
+export type GetProfileQuerySchema = z.infer<typeof getProfileQuerySchema>
