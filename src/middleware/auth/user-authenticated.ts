@@ -19,7 +19,7 @@ export const AuthMiddleware = AsyncMiddleware(async (req, res, next) => {
     throw new UnauthenticatedError();
   }
 
-  res.locals['account'] = user;
+  res.locals.account = user;
 
   next();
 });

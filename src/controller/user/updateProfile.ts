@@ -4,7 +4,7 @@ import { AsyncRoute } from "../../middleware/async-wrapper"
 import { updateProfileSchema } from "../../schema"
 
 export const updateProfile = AsyncRoute(async (req: Request, res: Response) => {
-    const account = res.locals['account'];
+    const account = res.locals.account;
     const id = account.id
     const data = updateProfileSchema.parse(req.body)
 
