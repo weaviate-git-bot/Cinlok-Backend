@@ -6,3 +6,8 @@ export const acceptPairSchema = z.object({
 
 export type AcceptPairSchema = z.infer<typeof acceptPairSchema>
 
+export const getPairQuerySchema = z.object({
+  n: z.coerce.number().optional(),
+})
+
+export type GetPairQuerySchema = z.infer<typeof getPairQuerySchema>

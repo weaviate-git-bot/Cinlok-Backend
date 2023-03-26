@@ -5,4 +5,5 @@ export * as debugController from './debug';
 export * as userController from './user';
 export * as tagController from './tag';
 export * as channelController from './channel';
+export * as universityController from './university';
 export * as chatController from './chat';

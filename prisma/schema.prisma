@@ -22,14 +22,16 @@ enum Role {
 }
 
 model User {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.LongText
-  description String        @db.LongText
-  dateOfBirth DateTime
-  latitude    Float
-  longitude   Float
-  sex         SexType
-  profileUrl  String
+  id             Int      @id @default(autoincrement())
+  name           String   @db.LongText
+  description    String   @db.LongText
+  dateOfBirth    DateTime
+  universitySlug String
+  latitude       Float
+  longitude      Float
+  sex            SexType
+  profileUrl     String
+
   account     Account?
   userPhoto   UserPhoto[]
   userTag     UserTag[]
@@ -38,6 +40,9 @@ model User {
   match       Match[]       @relation("user1")
   matchedUser Match[]       @relation("user2")
   userChannel UserChannel[]
+  university  University    @relation(fields: [universitySlug], references: [slug])
+
+  @@index([universitySlug])
 }
 
 model Account {
@@ -125,4 +130,17 @@ model Channel {
   id          Int           @id @default(autoincrement())
   name        String
   userChannel UserChannel[]
+  university  University?
+}
+
+model University {
+  slug       String  @id // ex) korea-university (slugged from name)
+  name       String
+  logoFileId String?
+  channelId  Int     @unique
+
+  channel Channel @relation(fields: [channelId], references: [id])
+  users   User[]
+
+  @@index([channelId])
 }

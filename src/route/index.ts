@@ -6,5 +6,6 @@ import * as UserRoute from "./user";
 import * as TagRoute from "./tag";
 import * as ChannelRoute from "./channel";
 import * as ChatRoute from "./chat";
+import * as UniversityRoute from "./university";
 
-export { AdminRoute, AuthRoute, DebugRoute, PairRoute, UserRoute, TagRoute, ChannelRoute, ChatRoute };
+export { AdminRoute, AuthRoute, DebugRoute, PairRoute, UserRoute, TagRoute, ChannelRoute, ChatRoute, UniversityRoute };
