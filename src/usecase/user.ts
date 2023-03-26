@@ -3,6 +3,7 @@ import context, { IContext } from "../context";
 import { BadRequestError } from "../error/client-error";
 import { InternalServerError } from "../error/server-error";
 import type { UpdateProfilePhotoSchema } from "../schema";
+import MixerService from "../service/mixer";
 import AccountUseCase from "../usecase/account";
 
 class UserUseCase {
@@ -69,6 +70,25 @@ class UserUseCase {
       }
     }
 
+    const user = await this.ctx.prisma.user.update({
+      where: { id },
+      data: rest,
+      include: {
+        account: {
+          select: {
+            username: true,
+            email: true,
+          }
+        },
+        userTag: true,
+        userChannel: {
+          include: {
+            channel: true,
+          }
+        }
+      }
+    });
+
     if (tags) {
       // Get valid tags
       const validTags = await this.ctx.prisma.tag.findMany({
@@ -97,24 +117,13 @@ class UserUseCase {
         })
       })
 
-
       // Update vector in mixer service
-      this.ctx.mixer.upsertUser(`${id}`, validTags.map((tag) => tag.tag));
+      for (const channel of user.userChannel) {
+        this.ctx.mixer.upsertUser(`${id}`, validTags.map((tag) => tag.tag), channel.channel.name);
+      }
     }
 
-    const user = await this.ctx.prisma.user.update({
-      where: { id },
-      data: rest,
-      include: {
-        account: {
-          select: {
-            username: true,
-            email: true,
-          }
-        },
-        userTag: true,
-      }
-    });
+
     if (!user) {
       throw new InternalServerError("User not found");
     }
@@ -211,6 +220,32 @@ class UserUseCase {
     });
 
     return userPhotos;
+  }
+
+  async mixerSync() {
+    const users = await this.ctx.prisma.user.findMany({
+      include: {
+        userTag: {
+          include: {
+            tag: true,
+          }
+        },
+        userChannel: {
+          include: {
+            channel: true,
+          }
+        }
+      }
+    });
+
+    await MixerService.clearChannel();
+
+    for (const user of users) {
+      const tags = user.userTag.map((tag) => tag.tag.tag);
+      for (const channel of user.userChannel) {
+        this.ctx.mixer.upsertUser(`${user.id}`, tags, channel.channel.name);
+      }
+    }
   }
 }
 

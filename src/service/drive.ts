@@ -18,6 +18,7 @@ const service = drive({
 // If you want to add more folders, add them here
 const folders = {
   photos: process.env.DRIVE_PHOTOS_FOLDER_ID,
+  univ_logo: process.env.DRIVE_UNIV_LOGO_FOLDER_ID,
 }
 
 type FolderName = keyof typeof folders;
@@ -37,7 +38,11 @@ const uploadFile = async (file: Express.Multer.File, folderName: FolderName, fil
     media: media,
     fields: 'id',
   });
-  return res.data.id;
+
+  if (!res.data.id) {
+    return null;
+  }
+  return res.data.id!
 };
 
 const deleteFile = async (fileId: string) => {

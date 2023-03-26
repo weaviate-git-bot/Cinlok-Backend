@@ -1,4 +1,4 @@
-import { PrismaClient, SexType } from "@prisma/client";
+import { PrismaClient, SexType, Tag, Role } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 
@@ -14,37 +14,21 @@ const dirtyGeneratedTags = [
   ),
 ];
 
-const generatedTags = Array.from(new Set(dirtyGeneratedTags));
-
-const promiseGeneratedUsers = Array(10)
-  .fill({})
-  .map(async () => {
-    const sex = Math.random() > 0.5 ? SexType.MALE : SexType.FEMALE;
-    const photos = Array(5)
+const dirtyGeneratedUniversity = [
+  ...new Set(
+    Array(10)
       .fill({})
       .map(() => {
-        return faker.image.imageUrl() + "/" + faker.random.numeric(5);
-      });
+        return faker.lorem.word();
+      })
+  ),
+]
 
-    const password = "password";
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, salt);
+const generatedTags = Array.from(new Set(dirtyGeneratedTags));
 
-    return {
-      email: faker.internet.email(),
-      username: faker.internet.userName(),
-      password: hash,
-      salt,
-      name: faker.name.firstName(),
-      description: faker.lorem.paragraph(),
-      dateOfBirth: faker.date.birthdate(),
-      latitude: faker.address.latitude(),
-      longitude: faker.address.longitude(),
-      profileUrl: faker.image.imageUrl(),
-      sex,
-      photos,
-    };
-  });
+const generatedUniversity = ["?", ...Array.from(new Set(dirtyGeneratedUniversity))];
+
+
 
 const clearDB = () => {
   return prisma.$transaction([
@@ -64,20 +48,90 @@ const main = async () => {
 
   console.log(`Start seeding ...`);
 
-  const createdTags = await Promise.all(
-    generatedTags.map(async (tag) => {
-      console.log(`Creating tag with name: ${tag}`);
-      const createdTag = await prisma.tag.create({
+  const createdTags: Tag[] = [];
+  for (const tag of generatedTags) {
+    const createdTag = await prisma.tag.create({
+      data: {
+        tag,
+      }
+    })
+    console.log(`Created tag with id: ${createdTag.id}`);
+    createdTags.push(createdTag);
+  }
+
+  const createdUniversity = await Promise.all(
+    generatedUniversity.map(async (university) => {
+      console.log(`Creating university with name: ${university}`);
+      const slug = university.toLowerCase().replace(/\s/g, "-");
+      const createdUniversity = await prisma.university.create({
         data: {
-          tag,
+          slug,
+          name: university,
+          logoFileId: null,
+          channel: {
+            create: {
+              name: `${university}`,
+            }
+          }
         },
       });
-      console.log(`Created tag with id: ${createdTag.id}`);
-      return createdTag;
+      return createdUniversity;
     })
   );
 
-  const generatedUsers = await Promise.all(promiseGeneratedUsers);
+
+  const generatedUsers = await Promise.all(
+    Array(10)
+      .fill({})
+      .map(async () => {
+        const sex = Math.random() > 0.5 ? SexType.MALE : SexType.FEMALE;
+        const photos = Array(5)
+          .fill({})
+          .map(() => {
+            return faker.image.imageUrl() + "/" + faker.random.numeric(5);
+          });
+
+        const password = "password";
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+
+        return {
+          email: faker.internet.email(),
+          username: faker.internet.userName(),
+          password: hash,
+          salt,
+          name: faker.name.firstName(),
+          description: faker.lorem.paragraph(),
+          dateOfBirth: faker.date.birthdate(),
+          latitude: faker.address.latitude(),
+          longitude: faker.address.longitude(),
+          profileUrl: faker.image.imageUrl(),
+          sex,
+          photos,
+          universitySlug: generatedUniversity[Math.floor(Math.random() * generatedUniversity.length)],
+        };
+      })
+  );
+
+  const adminPass = "admin";
+  const adminSalt = await bcrypt.genSalt(10);
+  const adminHash = await bcrypt.hash(adminPass, adminSalt);
+
+  generatedUsers.push({
+    email: "admin@gmail.com",
+    username: "admin",
+    password: adminHash,
+    salt: adminSalt,
+    name: "Admin",
+    description: "Admin",
+    dateOfBirth: faker.date.birthdate(),
+    latitude: faker.address.latitude(),
+    longitude: faker.address.longitude(),
+    profileUrl: faker.image.imageUrl(),
+    sex: SexType.MALE,
+    photos: [],
+    universitySlug: generatedUniversity[0],
+  })
 
   const createdUsers = await Promise.all(
     generatedUsers.map(async (u) => {
@@ -91,8 +145,18 @@ const main = async () => {
           longitude: parseFloat(u.longitude),
           sex: u.sex,
           profileUrl: u.profileUrl,
+          university: {
+            connect: {
+              slug: u.universitySlug,
+            }
+          },
         },
+        include: {
+          university: true,
+        }
       });
+
+      const role = u.username === "admin" ? Role.ADMIN : Role.USER;
 
       const account = await prisma.account.create({
         data: {
@@ -101,6 +165,7 @@ const main = async () => {
           username: u.username,
           password: u.password,
           salt: u.salt,
+          role,
         },
       });
 
@@ -126,6 +191,14 @@ const main = async () => {
           return createdUserTag;
         })
       );
+
+      // add user to university channel
+      await prisma.userChannel.create({
+        data: {
+          userId: user.id,
+          channelId: user.university.channelId,
+        }
+      });
 
       console.log(`Created user with id: ${user.id}`);
       return {

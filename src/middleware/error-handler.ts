@@ -11,6 +11,7 @@ const ErrorHandler: ErrorRequestHandler = (
   if (res.headersSent) {
     return next(err);
   }
+  console.log(err)
   if (err instanceof ZodError) {
     res.status(400).json({
       isError: true,

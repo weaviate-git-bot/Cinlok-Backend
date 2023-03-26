@@ -3,13 +3,41 @@ import MixerService from "../service/mixer";
 import { GDate } from "../utils";
 import matchUseCase from "./match";
 
-// const PAIR_REFRESH_TIME = 60 * 60 * 1000;
+const PAIR_REFRESH_TIME = parseInt(process.env['PAIR_REFRESH_TIME'] || '0') || 60 * 60 * 1000;
+const PairCache : {[key: number] : {[key: number] : Date}} = {}
+
+const DEG2RAD = Math.PI / 180;
+function distanceLatLong(lat1:number, lon1: number, lat2: number, lon2: number) {
+  const a = 0.5 -
+    Math.cos((lat2 - lat1) * DEG2RAD)/2 + 
+    Math.cos(lat1 * DEG2RAD) *
+    Math.cos(lat2 * DEG2RAD) * 
+    (1 - Math.cos((lon2 - lon1) * DEG2RAD))/2;
+
+  return 12742 * Math.asin(Math.sqrt(a)) * 1000; // 2 * R; R = 6371 km
+}
 
 class PairUseCase {
   private ctx: IContext;
 
   constructor(context: IContext) {
     this.ctx = context;
+  }
+
+  #updatePairCache(userId: number, pairedId: number) {
+    if (!(userId in PairCache)) {
+      PairCache[userId] = {}
+    }
+
+    PairCache[userId]![pairedId] = GDate.instance.now();
+  }
+
+  async reject(userId: number, pairedId: number) {
+    this.#updatePairCache(userId, pairedId);
+
+    return {
+      pair: null,
+    }
   }
 
   async accept(userId: number, pairedId: number) {
@@ -44,9 +72,7 @@ class PairUseCase {
     return pair;
   }
 
-  async get(userId: number) {
-    // TODO: Implement omit by cache
-
+  async get(userId: number, n: number = 10) {
     const oldPairs = await this.ctx.prisma.pair.findMany({
       where: {
         userId,
@@ -66,9 +92,27 @@ class PairUseCase {
       },
     }).then((matches) => matches.map((m) => m.userId1).concat(matches.map((m) => m.userId2)));
 
-    const omit = oldPairs.concat(oldMatches);
+    const omit = oldPairs.concat(oldMatches).concat(
+      Object.keys(PairCache[userId] || {}).map((k) => parseInt(k)).filter(
+        (k) => GDate.instance.now().getTime() - (PairCache[userId])![k]!.getTime() < PAIR_REFRESH_TIME
+      )
+    )
 
-    const nearest = await MixerService.getNearest(userId, 10, omit);
+    const user = await this.ctx.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        university: {
+          include: {
+            channel: true,
+          }
+        }
+      }
+    });
+    if (!user) return;
+
+    const nearest = await MixerService.getNearest(userId, n, omit, user.university.channel.name);
 
     const nearestUsers = await this.ctx.prisma.user.findMany({
       where: {
@@ -77,20 +121,35 @@ class PairUseCase {
         },
       },
       include: {
+        university: {
+          select: {
+            name: true,
+          }
+        },
         userPhoto: {
           select: {
             fileId: true,
           }
         },
         userTag: {
-          include: {
+          select: {
             tag: true,
           }
         }
       }
     });
 
-    return nearestUsers;
+    const time = GDate.instance.now().getTime();
+    const res = nearestUsers.map((u) => ({
+      id: u.id,
+      name: u.name,
+      age: Math.floor((time - u.dateOfBirth.getTime()) / 3.15576e+10),
+      university: u.university.name,
+      distance: distanceLatLong(user.latitude, user.longitude, u.latitude, u.longitude),
+      userPhoto: u.userPhoto.map((p) => p.fileId),
+      userTag: u.userTag.map((t) => t.tag.tag),
+    }));
+    return res;
   }
 }
 
