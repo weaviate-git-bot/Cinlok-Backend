@@ -77,7 +77,7 @@ class PairUseCase {
       where: {
         userId,
       },
-    }).then((pairs) => pairs.map((p) => p.userId));
+    }).then((pairs) => pairs.map((p) => p.pairedId));
 
     const oldMatches = await this.ctx.prisma.match.findMany({
       where: {
@@ -114,7 +114,7 @@ class PairUseCase {
 
     const nearest = await MixerService.getNearest(userId, n, omit, user.university.channel.name);
 
-    const nearestUsers = await this.ctx.prisma.user.findMany({
+    const users = await this.ctx.prisma.user.findMany({
       where: {
         id: {
           in: nearest,
@@ -138,6 +138,7 @@ class PairUseCase {
         }
       }
     });
+    const nearestUsers = nearest.map((id) => users.find((u) => u.id === id)!).filter((u) => u !== undefined);
 
     const time = GDate.instance.now().getTime();
     const res = nearestUsers.map((u) => ({
