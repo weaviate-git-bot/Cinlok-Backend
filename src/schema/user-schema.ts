@@ -4,7 +4,10 @@ export const updateProfileSchema = z.object({
     username: z.string().optional(),
     name: z.string().optional(),
     description: z.string().optional(),
-    dateOfBirth: z.string().optional(),
+    dateOfBirth: z.string().transform(
+        // Transform yyyy-mm-dd to Date
+        (s) => new Date(s)
+    ).optional(),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
     sex: z.string().optional(),
