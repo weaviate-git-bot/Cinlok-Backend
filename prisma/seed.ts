@@ -16,7 +16,7 @@ const dirtyGeneratedTags = [
 
 const dirtyGeneratedUniversity = [
   ...new Set(
-    Array(10)
+    Array(3)
       .fill({})
       .map(() => {
         return faker.lorem.word();
@@ -81,7 +81,7 @@ const main = async () => {
 
 
   const generatedUsers = await Promise.all(
-    Array(10)
+    Array(100)
       .fill({})
       .map(async () => {
         const sex = Math.random() > 0.5 ? SexType.MALE : SexType.FEMALE;
@@ -209,92 +209,92 @@ const main = async () => {
     })
   );
 
-  const generatedPairs = createdUsers.map((u) => {
-    const dirtyPairs = createdUsers
-      .filter((e) => {
-        return Math.random() > 0.5 && e.user.id !== u.user.id;
-      })
-      .map((e) => {
-        return e.user.id;
-      });
-    const confirmedPairs = dirtyPairs.filter((e) => e !== u.user.id);
-    return {
-      userId: u.user.id,
-      pairs: confirmedPairs,
-    };
-  });
+  // const generatedPairs = createdUsers.map((u) => {
+  //   const dirtyPairs = createdUsers
+  //     .filter((e) => {
+  //       return Math.random() > 0.5 && e.user.id !== u.user.id;
+  //     })
+  //     .map((e) => {
+  //       return e.user.id;
+  //     });
+  //   const confirmedPairs = dirtyPairs.filter((e) => e !== u.user.id);
+  //   return {
+  //     userId: u.user.id,
+  //     pairs: confirmedPairs,
+  //   };
+  // });
 
-  const createdPairs = await Promise.all(
-    generatedPairs.map(async (pair) => {
-      const createdPair = await Promise.all(
-        pair.pairs.map(async (p) => {
-          console.log(`Creating pair: ${pair.userId} - ${p}`);
-          const createdPair = await prisma.pair.create({
-            data: {
-              userId: pair.userId,
-              pairedId: p,
-              timestamp: faker.date.recent(),
-            },
-          });
-          return createdPair;
-        })
-      );
+  // const createdPairs = await Promise.all(
+  //   generatedPairs.map(async (pair) => {
+  //     const createdPair = await Promise.all(
+  //       pair.pairs.map(async (p) => {
+  //         console.log(`Creating pair: ${pair.userId} - ${p}`);
+  //         const createdPair = await prisma.pair.create({
+  //           data: {
+  //             userId: pair.userId,
+  //             pairedId: p,
+  //             timestamp: faker.date.recent(),
+  //           },
+  //         });
+  //         return createdPair;
+  //       })
+  //     );
 
-      return {
-        userId: pair.userId,
-        pairs: createdPair,
-      };
-    })
-  );
+  //     return {
+  //       userId: pair.userId,
+  //       pairs: createdPair,
+  //     };
+  //   })
+  // );
 
-  const generatedMatched: {
-    userId1: number;
-    userId2: number;
-  }[] = [];
-  for (let i = 0; i < createdPairs.length; i++) {
-    for (let j = 0; j < createdPairs[i].pairs.length; j++) {
-      const userId1 = createdPairs[i].userId;
-      const userId2 = createdPairs[i].pairs[j].pairedId;
+  // const generatedMatched: {
+  //   userId1: number;
+  //   userId2: number;
+  // }[] = [];
+  // for (let i = 0; i < createdPairs.length; i++) {
+  //   for (let j = 0; j < createdPairs[i].pairs.length; j++) {
+  //     const userId1 = createdPairs[i].userId;
+  //     const userId2 = createdPairs[i].pairs[j].pairedId;
 
-      if (userId1 < userId2) {
-        continue;
-      }
+  //     if (userId1 < userId2) {
+  //       continue;
+  //     }
 
-      const pairToCheck = createdPairs.find((e) => e.userId === userId2);
-      if (!pairToCheck) {
-        continue;
-      }
-      for (const pair of pairToCheck.pairs) {
-        if (pair.pairedId === userId1) {
-          generatedMatched.push({
-            userId1,
-            userId2,
-          });
-          break;
-        }
-      }
-    }
-  }
-  const createdMatched = await Promise.all(
-    generatedMatched.map(async (m) => {
-      console.log(`Creating match: ${m.userId1} - ${m.userId2}`);
-      const createdMatch = await prisma.match.create({
-        data: {
-          userId1: m.userId1,
-          userId2: m.userId2,
-          timestamp: faker.date.recent(),
-        },
-      });
-      return createdMatch;
-    })
-  );
+  //     const pairToCheck = createdPairs.find((e) => e.userId === userId2);
+  //     if (!pairToCheck) {
+  //       continue;
+  //     }
+  //     for (const pair of pairToCheck.pairs) {
+  //       if (pair.pairedId === userId1) {
+  //         generatedMatched.push({
+  //           userId1,
+  //           userId2,
+  //         });
+  //         break;
+  //       }
+  //     }
+  //   }
+  // }
+  // const createdMatched = await Promise.all(
+  //   generatedMatched.map(async (m) => {
+  //     console.log(`Creating match: ${m.userId1} - ${m.userId2}`);
+  //     const createdMatch = await prisma.match.create({
+  //       data: {
+  //         userId1: m.userId1,
+  //         userId2: m.userId2,
+  //         timestamp: faker.date.recent(),
+  //       },
+  //     });
+  //     return createdMatch;
+  //   })
+  // );
 
   console.log(`Seeding finished.`);
   console.log({
     createdTags,
     createdUsers,
-    createdPairs,
-    createdMatched,
+    // createdPairs,
+    // createdMatched,
   });
 };
 
