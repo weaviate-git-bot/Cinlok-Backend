@@ -29,6 +29,23 @@ class MatchUseCase {
           userId2: data.pairedId,
           timestamp: GDate.instance.now(),
         },
+        select: {
+          timestamp: true,
+          user1: {
+            select: {
+              id: true,
+              name: true,
+              userPhoto: true,
+            },
+          },
+          user2: {
+            select: {
+              id: true,
+              name: true,
+              userPhoto: true,
+            },
+          },
+        }
       }),
       this.ctx.prisma.pair.update({
         where: {
