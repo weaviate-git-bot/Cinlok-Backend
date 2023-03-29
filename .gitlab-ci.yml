@@ -10,7 +10,7 @@ image: node:lts-alpine
   before_script:
     - npm i -g pnpm
     - pnpm config set store-dir .pnpm-store
-    - pnpm i
+    - pnpm i --no-frozen-lockfile
 
 stages:          # List of stages for jobs, and their order of execution
   - build

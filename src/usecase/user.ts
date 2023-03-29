@@ -42,6 +42,11 @@ class UserUseCase {
             tag: true,
           }
         },
+        university: {
+          select: {
+            name: true,
+          }
+        }
       }
     });
     if (!user) {
