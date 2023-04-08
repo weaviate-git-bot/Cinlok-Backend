@@ -41,20 +41,32 @@ model User {
   matchedUser Match[]       @relation("user2")
   userChannel UserChannel[]
   university  University    @relation(fields: [universitySlug], references: [slug])
+  Message     Message[]
 
   @@index([universitySlug])
 }
 
 model Account {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  username String @unique
-  password String
-  salt     String
-  role     Role   @default(USER)
-  user     User   @relation(fields: [id], references: [id])
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  username     String         @unique
+  password     String
+  salt         String
+  role         Role           @default(USER)
+  user         User           @relation(fields: [id], references: [id])
+  AccountToken AccountToken[]
 
   @@index([id])
+}
+
+model AccountToken {
+  accountId Int
+  token     String
+
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@id([accountId, token])
+  @@index([accountId])
 }
 
 model UserPhoto {
@@ -100,13 +112,15 @@ model Pair {
 }
 
 model Match {
-  id        Int      @id @default(autoincrement())
-  userId1   Int
-  userId2   Int
-  timestamp DateTime
+  id          Int      @id @default(autoincrement())
+  userId1     Int
+  userId2     Int
+  timestamp   DateTime
+  unreadCount Int      @default(0)
 
-  user1 User @relation("user1", fields: [userId1], references: [id])
-  user2 User @relation("user2", fields: [userId2], references: [id])
+  user1    User      @relation("user1", fields: [userId1], references: [id])
+  user2    User      @relation("user2", fields: [userId2], references: [id])
+  messages Message[]
 
   @@index([userId2])
   @@index([userId1])
@@ -143,4 +157,21 @@ model University {
   users   User[]
 
   @@index([channelId])
+}
+
+model Message {
+  id       String  @id @default(uuid())
+  matchId  Int
+  senderId Int
+  isRead   Boolean @default(false)
+
+  content   String   @db.LongText
+  timestamp DateTime
+
+  match  Match @relation(fields: [matchId], references: [id])
+  sender User  @relation(fields: [senderId], references: [id])
+
+  @@index([matchId])
+  @@index([senderId])
+  @@index([timestamp])
 }

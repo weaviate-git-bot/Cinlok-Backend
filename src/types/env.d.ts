@@ -7,6 +7,7 @@ declare global {
       DRIVE_PHOTOS_FOLDER_ID: string;
       DRIVE_UNIV_LOGO_FOLDER_ID: string;
       MIXER_BASE_URL: string;
+      GOOGLE_APPLICATION_CREDENTIALS: string;
     }
   }
 }
