@@ -14,13 +14,13 @@ class ChatUseCase {
 
     const filtered = accounts.filter((acc) => acc.id !== curAcc.id);
     const withKeys = filtered.map((acc) => {
-        const key = acc.id > curAcc.id ? `${curAcc.id}-${acc.id}` : `${acc.id}-${curAcc.id}`;
+      const key = acc.id > curAcc.id ? `${curAcc.id}-${acc.id}` : `${acc.id}-${curAcc.id}`;
         
-        return {
-            ...acc,
-            key,
-        }
-    })
+      return {
+        ...acc,
+        key,
+      };
+    });
 
     return withKeys;
   }

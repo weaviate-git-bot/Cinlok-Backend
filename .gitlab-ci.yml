@@ -29,6 +29,12 @@ build-job:       # This job runs in the build stage, which runs first.
 #   script:
 #     - pnpm test
 
+lint-test-job:
+  stage: test
+  extends: .use_pnpm
+  script:
+    - pnpm lint
+
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
   only:

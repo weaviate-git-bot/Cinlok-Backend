@@ -10,7 +10,7 @@ export interface IContext {
   mixer: typeof MixerService;
   cache: typeof CacheService;
   isMock: boolean;
-};
+}
 
 const ctx = {
   prisma,
@@ -18,13 +18,13 @@ const ctx = {
   mixer: MixerService,
   cache: CacheService,
   isMock: false,
-}
+};
 
 export const setCtx = (context: IContext) => {
   ctx.prisma = context.prisma;
   ctx.isMock = context.isMock;
   ctx.mixer = context.mixer;
   ctx.drive = context.drive;
-}
+};
 
 export default ctx;

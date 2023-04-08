@@ -29,7 +29,7 @@ server.use(ErrorHandler);
 async function main() {
   try {
     server.listen(3000, () => {
-      console.log(`Server ready at http://localhost:3000`);
+      console.log("Server ready at http://localhost:3000");
     });
   } catch (e) {
     console.error(e);
