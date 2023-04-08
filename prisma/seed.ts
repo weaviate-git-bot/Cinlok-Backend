@@ -39,6 +39,9 @@ const clearDB = () => {
     prisma.pair.deleteMany({}),
     prisma.match.deleteMany({}),
     prisma.user.deleteMany({}),
+    prisma.university.deleteMany({}),
+    prisma.userChannel.deleteMany({}),
+    prisma.channel.deleteMany({}),
   ]);
 }
 

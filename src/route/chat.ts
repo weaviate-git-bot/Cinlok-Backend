@@ -4,6 +4,9 @@ import { chatController } from "../controller";
 import { AuthMiddleware } from "../middleware/auth/user-authenticated";
 
 const ChatRoute = Router();
-ChatRoute.get("/users", AuthMiddleware, chatController.users);
+ChatRoute.put("/token", AuthMiddleware, chatController.upsertToken);
+ChatRoute.get("/", AuthMiddleware, chatController.getChat);
+ChatRoute.get("/:id/message", AuthMiddleware, chatController.getMessages);
+ChatRoute.post("/message", AuthMiddleware, chatController.sendMessage);
 
 export default ChatRoute;
