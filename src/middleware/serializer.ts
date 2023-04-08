@@ -4,7 +4,7 @@ const Serializer = (_: Request, res: Response, next: NextFunction) => {
   res.json = ((data: any) => {
     res.setHeader("Content-Type", "application/json");
     if (data instanceof Object && !(data instanceof Array)) {
-      const { message, isError, ...rest } = data
+      const { message, isError, ...rest } = data;
       res.send(JSON.stringify({
         isError: isError || false,
         message: message || (isError ? "Failed" : "Success"),
@@ -21,4 +21,4 @@ const Serializer = (_: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-export default Serializer
+export default Serializer;

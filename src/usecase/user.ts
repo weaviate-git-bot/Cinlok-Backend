@@ -50,7 +50,7 @@ class UserUseCase {
       }
     });
     if (!user) {
-      throw new BadRequestError("User not found")
+      throw new BadRequestError("User not found");
     }
     return user;
   }
@@ -65,7 +65,7 @@ class UserUseCase {
   async updateProfile(id: number, data: any): Promise<User> {
     const { username, tags, ...rest } = data;
     if (!await this.getUserById(id)) {
-      throw new BadRequestError("User not found")
+      throw new BadRequestError("User not found");
     }
 
     if (username) {
@@ -119,8 +119,8 @@ class UserUseCase {
             userId: id,
           })),
           skipDuplicates: true,
-        })
-      })
+        });
+      });
 
       // Update vector in mixer service
       for (const channel of user.userChannel) {
@@ -138,7 +138,7 @@ class UserUseCase {
   async updateProfilePhoto(id: number, files: UpdateProfilePhotoSchema) {
     const user = await this.getUserById(id);
     if (!user) {
-      throw new BadRequestError("User not found")
+      throw new BadRequestError("User not found");
     }
 
     for (const key of Object.keys(files)) {
@@ -195,7 +195,7 @@ class UserUseCase {
   async deleteProfilePhoto(id: number, index: number[]) {
     const user = await this.getUserById(id);
     if (!user) {
-      throw new BadRequestError("User not found")
+      throw new BadRequestError("User not found");
     }
 
     const photos = await this.ctx.prisma.userPhoto.findMany({

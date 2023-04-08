@@ -4,7 +4,7 @@ import prisma from "../../repository";
 import { AsyncMiddleware } from "../async-wrapper";
 
 export const AuthMiddleware = AsyncMiddleware(async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     throw new UnauthenticatedError();
   }

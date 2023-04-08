@@ -25,7 +25,7 @@ class AccountUseCase {
       if (hash === account.password) {
         const token = jwt.sign({
           id: account.id,
-        })
+        });
         return token;
       }
     }
@@ -58,7 +58,7 @@ class AccountUseCase {
     const hash = await bcrypt.hash(password, salt);
 
     if (!await this.isUniqueEmail(email) || !await this.isUniqueUsername(username)) {
-      throw new RegisterError()
+      throw new RegisterError();
     }
     const university = await this.ctx.prisma.university.findUnique({
       where: {

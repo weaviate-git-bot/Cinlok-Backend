@@ -3,8 +3,8 @@ import MixerService from "../service/mixer";
 import { GDate } from "../utils";
 import matchUseCase from "./match";
 
-const PAIR_REFRESH_TIME = parseInt(process.env['PAIR_REFRESH_TIME'] || '0') || 60 * 60 * 1000;
-const PairCache : {[key: number] : {[key: number] : Date}} = {}
+const PAIR_REFRESH_TIME = parseInt(process.env["PAIR_REFRESH_TIME"] || "0") || 60 * 60 * 1000;
+const PairCache : {[key: number] : {[key: number] : Date}} = {};
 
 const DEG2RAD = Math.PI / 180;
 function distanceLatLong(lat1:number, lon1: number, lat2: number, lon2: number) {
@@ -26,7 +26,7 @@ class PairUseCase {
 
   #updatePairCache(userId: number, pairedId: number) {
     if (!(userId in PairCache)) {
-      PairCache[userId] = {}
+      PairCache[userId] = {};
     }
 
     PairCache[userId]![pairedId] = GDate.instance.now();
@@ -37,7 +37,7 @@ class PairUseCase {
 
     return {
       pair: null,
-    }
+    };
   }
 
   async accept(userId: number, pairedId: number) {
@@ -72,7 +72,7 @@ class PairUseCase {
     return pair;
   }
 
-  async get(userId: number, n: number = 10) {
+  async get(userId: number, n = 10) {
     const oldPairs = await this.ctx.prisma.pair.findMany({
       where: {
         userId,
@@ -96,7 +96,7 @@ class PairUseCase {
       Object.keys(PairCache[userId] || {}).map((k) => parseInt(k)).filter(
         (k) => GDate.instance.now().getTime() - (PairCache[userId])![k]!.getTime() < PAIR_REFRESH_TIME
       )
-    )
+    );
 
     const user = await this.ctx.prisma.user.findUnique({
       where: {

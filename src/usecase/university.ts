@@ -80,7 +80,7 @@ class UniversityUseCase {
     if (university.logoFileId) await this.ctx.drive.deleteFile(university.logoFileId);
     const deletedUniversity = await this.ctx.prisma.$transaction(async (tx) => {
       const deletedUniversity = await tx.university.delete({ where: { slug } });
-      await ChannelUseCase.deleteChannel(university.channelId)
+      await ChannelUseCase.deleteChannel(university.channelId);
       return deletedUniversity;
     });
     return deletedUniversity;
