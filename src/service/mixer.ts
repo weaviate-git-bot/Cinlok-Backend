@@ -4,6 +4,12 @@ const mixerApi = axios.create({
   baseURL: process.env.MIXER_BASE_URL || "http://localhost:5000"
 });
 
+type UserMixer = {
+  id: number;
+  words: string[];
+  channel: string;
+}
+
 const upsertUser = async (userId: string, words: string[], channel: string) => {
   // To avoid 0 sized array
   if (!words.includes("person")) {
@@ -36,10 +42,20 @@ const clearChannel = async () => {
   return data;
 };
 
+const upsertBatch = async (users: UserMixer[]) => {
+  console.log({ users });
+  const { data } = await mixerApi.post("/user/batch", {
+    users
+  });
+
+  return data;
+};
+
 const MixerService = {
   upsertUser,
   getNearest,
-  clearChannel
+  clearChannel,
+  upsertBatch,
 };
 
 export default MixerService;

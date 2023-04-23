@@ -3,7 +3,6 @@ import context, { IContext } from "../context";
 import { BadRequestError } from "../error/client-error";
 import { InternalServerError } from "../error/server-error";
 import type { UpdateProfilePhotoSchema } from "../schema";
-import MixerService from "../service/mixer";
 import AccountUseCase from "../usecase/account";
 
 class UserUseCase {
@@ -243,14 +242,23 @@ class UserUseCase {
       }
     });
 
-    await MixerService.clearChannel();
-
-    for (const user of users) {
-      const tags = user.userTag.map((tag) => tag.tag.tag);
-      for (const channel of user.userChannel) {
-        this.ctx.mixer.upsertUser(`${user.id}`, tags, channel.channel.name);
+    const mixerUser = users.map((user) => {
+      if (!user.userChannel[0]) {
+        return null;
       }
-    }
+      return {
+        id: `${user.id}`,
+        words: user.userTag.map((userTag) => userTag.tag.tag),
+        channel: user.userChannel[0].channel.name,
+      };
+    }).reduce((acc, cur) => {
+      if (cur) {
+        acc.push(cur);
+      }
+      return acc;
+    }, [] as any[]);
+
+    await this.ctx.mixer.upsertBatch(mixerUser);
   }
 }
 
