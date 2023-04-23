@@ -38,6 +38,7 @@ const clearDB = () => {
     prisma.account.deleteMany({}),
     prisma.pair.deleteMany({}),
     prisma.match.deleteMany({}),
+    prisma.message.deleteMany({}),
     prisma.user.deleteMany({}),
     prisma.university.deleteMany({}),
     prisma.userChannel.deleteMany({}),
@@ -47,7 +48,7 @@ const clearDB = () => {
 
 const main = async () => {
   console.log(`Clearing Database ...`);
-  clearDB();
+  await clearDB();
 
   console.log(`Start seeding ...`);
 
@@ -84,7 +85,7 @@ const main = async () => {
 
 
   const generatedUsers = await Promise.all(
-    Array(100)
+    Array(1000)
       .fill({})
       .map(async () => {
         const sex = Math.random() > 0.5 ? SexType.MALE : SexType.FEMALE;
