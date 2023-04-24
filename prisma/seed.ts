@@ -26,7 +26,7 @@ const dirtyGeneratedUniversity = [
 
 const generatedTags = Array.from(new Set(dirtyGeneratedTags));
 
-const generatedUniversity = ["?", ...Array.from(new Set(dirtyGeneratedUniversity))];
+const generatedUniversity = [...Array.from(new Set(dirtyGeneratedUniversity))];
 
 
 
@@ -85,7 +85,7 @@ const main = async () => {
 
 
   const generatedUsers = await Promise.all(
-    Array(1000)
+    Array(20)
       .fill({})
       .map(async () => {
         const sex = Math.random() > 0.5 ? SexType.MALE : SexType.FEMALE;
@@ -112,7 +112,7 @@ const main = async () => {
           profileUrl: faker.image.imageUrl(),
           sex,
           photos,
-          universitySlug: generatedUniversity[Math.floor(Math.random() * generatedUniversity.length)],
+          universitySlug: generatedUniversity[Math.floor(Math.random() * generatedUniversity.length)] as string | undefined,
         };
       })
   );
@@ -134,27 +134,32 @@ const main = async () => {
     profileUrl: faker.image.imageUrl(),
     sex: SexType.MALE,
     photos: [],
-    universitySlug: generatedUniversity[0],
+    universitySlug: undefined,
   })
 
   const createdUsers = await Promise.all(
     generatedUsers.map(async (u) => {
       console.log(`Creating user: ${JSON.stringify(u)}`);
-      const user = await prisma.user.create({
-        data: {
-          name: u.name,
-          description: u.description,
-          dateOfBirth: u.dateOfBirth,
-          latitude: parseFloat(u.latitude),
-          longitude: parseFloat(u.longitude),
-          sex: u.sex,
-          profileUrl: u.profileUrl,
-          university: {
-            connect: {
-              slug: u.universitySlug,
-            }
-          },
+
+      const temp = {
+        name: u.name,
+        description: u.description,
+        dateOfBirth: u.dateOfBirth,
+        latitude: parseFloat(u.latitude),
+        longitude: parseFloat(u.longitude),
+        sex: u.sex,
+        profileUrl: u.profileUrl,
+      }
+      const created = u.universitySlug ? {
+        ...temp, university: {
+          connect: {
+            slug: u.universitySlug,
+          }
         },
+      } : temp;
+
+      const user = await prisma.user.create({
+        data: created,
         include: {
           university: true,
         }
@@ -196,13 +201,15 @@ const main = async () => {
         })
       );
 
-      // add user to university channel
-      await prisma.userChannel.create({
-        data: {
-          userId: user.id,
-          channelId: user.university.channelId,
-        }
-      });
+      if (user.university) {
+        // add user to university channel
+        await prisma.userChannel.create({
+          data: {
+            userId: user.id,
+            channelId: user.university.channelId,
+          }
+        });
+      }
 
       console.log(`Created user with id: ${user.id}`);
       return {
