@@ -110,7 +110,7 @@ class PairUseCase {
         }
       }
     });
-    if (!user || !user.university) return;
+    if (!user || !user.university) return [];
 
     const nearest = await MixerService.getNearest(userId, n, omit, user.university.channel.name);
 
