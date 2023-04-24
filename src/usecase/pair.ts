@@ -110,7 +110,7 @@ class PairUseCase {
         }
       }
     });
-    if (!user) return;
+    if (!user || !user.university) return;
 
     const nearest = await MixerService.getNearest(userId, n, omit, user.university.channel.name);
 
@@ -145,7 +145,7 @@ class PairUseCase {
       id: u.id,
       name: u.name,
       age: Math.floor((time - u.dateOfBirth.getTime()) / 3.15576e+10),
-      university: u.university.name,
+      university: u.university ? u.university.name : "",
       distance: distanceLatLong(user.latitude, user.longitude, u.latitude, u.longitude),
       userPhoto: u.userPhoto.map((p) => p.fileId),
       userTag: u.userTag.map((t) => t.tag.tag),

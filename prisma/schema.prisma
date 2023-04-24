@@ -26,7 +26,7 @@ model User {
   name           String   @db.LongText
   description    String   @db.LongText
   dateOfBirth    DateTime
-  universitySlug String
+  universitySlug String?
   latitude       Float
   longitude      Float
   sex            SexType
@@ -40,7 +40,7 @@ model User {
   match       Match[]       @relation("user1")
   matchedUser Match[]       @relation("user2")
   userChannel UserChannel[]
-  university  University    @relation(fields: [universitySlug], references: [slug])
+  university  University?    @relation(fields: [universitySlug], references: [slug])
   Message     Message[]
 
   @@index([universitySlug])
