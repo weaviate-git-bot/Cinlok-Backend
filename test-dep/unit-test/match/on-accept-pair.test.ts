@@ -1,7 +1,8 @@
 import { IMockContext, createMockContext } from "../../context";
 import type { IContext } from "../../../src/context";
-import { MatchUseCase } from "../../../src/usecase";
+import { MatchUseCase } from "../../../src/usecase/match";
 import { GDate } from "../../../src/utils";
+import type { Match } from "@prisma/client";
 
 let mockCtx: IMockContext;
 let ctx: IContext;
@@ -45,11 +46,12 @@ test("should create match and update pair successfully", async () => {
   mockCtx.prisma.pair.update.mockResolvedValue(updatedPairedPair);
   mockCtx.prisma.pair.update.mockResolvedValue(updatedCurPair);
 
-  const match = {
+  const match: Match = {
     id: 2,
     userId1: accReq.userId,
     userId2: accReq.pairedId,
     timestamp: curDate,
+    unreadCount: 0,
   };
   mockCtx.prisma.match.create.mockResolvedValue(match);
 
