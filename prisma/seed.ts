@@ -1,35 +1,59 @@
-import { PrismaClient, SexType, Tag, Role } from "@prisma/client";
-import { faker } from "@faker-js/faker";
+import { PrismaClient, SexType, Tag, Role, User } from "@prisma/client";
+import { Sex, faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 import UseCaseUser from "../src/usecase/user";
 
 const prisma = new PrismaClient();
 
-const dirtyGeneratedTags = [
-  ...new Set(
-    Array(10)
-      .fill({})
-      .map(() => {
-        return faker.lorem.word();
-      })
-  ),
+const IS_DEVELOPMENT = process.env.IS_DEVELOPMENT === "true";
+
+const generatedTags = [
+  "Non-smoker",
+  "Smoker",
+  "Univ Student",
+  "Working",
+  "For Fun",
+  "Serious Only",
+  "Drinker",
+  "Non-drinker",
+  "Gamer",
+  "Sporty",
+  "Shy",
 ];
 
-const dirtyGeneratedUniversity = [
-  ...new Set(
-    Array(3)
-      .fill({})
-      .map(() => {
-        return faker.lorem.word();
-      })
-  ),
-]
+const generatedUniversity = [
+  "University of Indonesia",
+  "Bandung Institute of Technology",
+  "Gadjah Mada University",
+  "Sepuluh Nopember Institute of Technology",
+  "Bogor Agricultural University",
+  "Diponegoro University",
+  "Padjadjaran University",
+  "Airlangga University",
+  "Brawijaya University",
+  "Hasanuddin University",
+];
 
-const generatedTags = Array.from(new Set(dirtyGeneratedTags));
+const generateUser = async (name: string, username: string, password: string, sex: SexType, universitySlug?: string) => {
+  const salt = await bcrypt.genSalt(10);
+  const hashed = await bcrypt.hash(password, salt);
 
-const generatedUniversity = [...Array.from(new Set(dirtyGeneratedUniversity))];
-
-
+  return {
+    email: username + "@gmail.com",
+    username,
+    password: hashed,
+    salt,
+    name,
+    description: "Generated User: " + name,
+    dateOfBirth: faker.date.birthdate(),
+    latitude: faker.address.latitude(),
+    longitude: faker.address.longitude(),
+    profileUrl: faker.image.imageUrl(),
+    sex,
+    photos: [],
+    universitySlug,
+  }
+}
 
 const clearDB = () => {
   return prisma.$transaction([
@@ -85,8 +109,7 @@ const main = async () => {
     })
   );
 
-
-  const generatedUsers = await Promise.all(
+  const generatedUsers = IS_DEVELOPMENT ? await Promise.all(
     Array(20)
       .fill({})
       .map(async () => {
@@ -117,31 +140,17 @@ const main = async () => {
           universitySlug: generatedUniversity[Math.floor(Math.random() * generatedUniversity.length)] as string | undefined,
         };
       })
-  );
+  ) : [];
 
-  const adminPass = "admin";
-  const adminSalt = await bcrypt.genSalt(10);
-  const adminHash = await bcrypt.hash(adminPass, adminSalt);
-
-  generatedUsers.push({
-    email: "admin@gmail.com",
-    username: "admin",
-    password: adminHash,
-    salt: adminSalt,
-    name: "Admin",
-    description: "Admin",
-    dateOfBirth: faker.date.birthdate(),
-    latitude: faker.address.latitude(),
-    longitude: faker.address.longitude(),
-    profileUrl: faker.image.imageUrl(),
-    sex: SexType.MALE,
-    photos: [],
-    universitySlug: undefined,
-  })
+  const admin = await generateUser("Admin", "admin", "admin", SexType.MALE);
+  const generatedUser1 = await generateUser("User 1", "user1", "user1", SexType.MALE, createdUniversity[0].slug);
+  const generatedUser2 = await generateUser("User 2", "user2", "user2", SexType.FEMALE, createdUniversity[0].slug);
+  const generatedUser3 = await generateUser("User 3", "user3", "user3", SexType.MALE, createdUniversity[0].slug);
+  generatedUsers.push(admin , generatedUser1, generatedUser2, generatedUser3);
 
   const createdUsers = await Promise.all(
     generatedUsers.map(async (u) => {
-      console.log(`Creating user: ${JSON.stringify(u)}`);
+      console.log(`Creating user: ${u.username}`);
 
       const temp = {
         name: u.name,
@@ -152,13 +161,10 @@ const main = async () => {
         sex: u.sex,
         profileUrl: u.profileUrl,
       }
-      const created = u.universitySlug ? {
-        ...temp, university: {
-          connect: {
-            slug: u.universitySlug,
-          }
-        },
-      } : temp;
+      const created = {
+        ...temp,
+        universitySlug: u.universitySlug,
+      }
 
       const user = await prisma.user.create({
         data: created,
@@ -166,6 +172,8 @@ const main = async () => {
           university: true,
         }
       });
+
+      console.log(`Created user: ${JSON.stringify(created)}`);
 
       const role = u.username === "admin" ? Role.ADMIN : Role.USER;
 
@@ -222,93 +230,53 @@ const main = async () => {
     })
   );
 
-  // const generatedPairs = createdUsers.map((u) => {
-  //   const dirtyPairs = createdUsers
-  //     .filter((e) => {
-  //       return Math.random() > 0.5 && e.user.id !== u.user.id;
-  //     })
-  //     .map((e) => {
-  //       return e.user.id;
-  //     });
-  //   const confirmedPairs = dirtyPairs.filter((e) => e !== u.user.id);
-  //   return {
-  //     userId: u.user.id,
-  //     pairs: confirmedPairs,
-  //   };
-  // });
+  const createPair = async (user1: User, user2: User) => {
+    const pair1 = await prisma.pair.create({
+      data: {
+        userId: user1.id,
+        pairedId: user2.id,
+        hasMatched: true,
+        timestamp: new Date(),
+      },
+    });
+    const pair2 = await prisma.pair.create({
+      data: {
+        userId: user2.id,
+        pairedId: user1.id,
+        hasMatched: true,
+        timestamp: new Date(),
+      },
+    });
 
-  // const createdPairs = await Promise.all(
-  //   generatedPairs.map(async (pair) => {
-  //     const createdPair = await Promise.all(
-  //       pair.pairs.map(async (p) => {
-  //         console.log(`Creating pair: ${pair.userId} - ${p}`);
-  //         const createdPair = await prisma.pair.create({
-  //           data: {
-  //             userId: pair.userId,
-  //             pairedId: p,
-  //             timestamp: faker.date.recent(),
-  //           },
-  //         });
-  //         return createdPair;
-  //       })
-  //     );
+    console.log(`Created pair with id: ${pair1.id}`);
+    console.log(`Created pair with id: ${pair2.id}`);
+    return {
+      pair1,
+      pair2,
+    };
+  }
 
-  //     return {
-  //       userId: pair.userId,
-  //       pairs: createdPair,
-  //     };
-  //   })
-  // );
+  const createMatch = async (user1: User, user2: User) => {
+    const match = await prisma.match.create({
+      data: {
+        userId1: user1.id,
+        userId2: user2.id,
+        timestamp: new Date(),
+      },
+    })
 
-  // const generatedMatched: {
-  //   userId1: number;
-  //   userId2: number;
-  // }[] = [];
-  // for (let i = 0; i < createdPairs.length; i++) {
-  //   for (let j = 0; j < createdPairs[i].pairs.length; j++) {
-  //     const userId1 = createdPairs[i].userId;
-  //     const userId2 = createdPairs[i].pairs[j].pairedId;
+    return match;
+  }
 
-  //     if (userId1 < userId2) {
-  //       continue;
-  //     }
+  const user1 = createdUsers.find((u) => u.account.username === "user1")?.user;
+  const user2 = createdUsers.find((u) => u.account.username === "user2")?.user;
 
-  //     const pairToCheck = createdPairs.find((e) => e.userId === userId2);
-  //     if (!pairToCheck) {
-  //       continue;
-  //     }
-  //     for (const pair of pairToCheck.pairs) {
-  //       if (pair.pairedId === userId1) {
-  //         generatedMatched.push({
-  //           userId1,
-  //           userId2,
-  //         });
-  //         break;
-  //       }
-  //     }
-  //   }
-  // }
-  // const createdMatched = await Promise.all(
-  //   generatedMatched.map(async (m) => {
-  //     console.log(`Creating match: ${m.userId1} - ${m.userId2}`);
-  //     const createdMatch = await prisma.match.create({
-  //       data: {
-  //         userId1: m.userId1,
-  //         userId2: m.userId2,
-  //         timestamp: faker.date.recent(),
-  //       },
-  //     });
-  //     return createdMatch;
-  //   })
-  // );
+  if (user1 && user2) {
+    const pair = await createPair(user1, user2);
+    const match = await createMatch(user1, user2);
+  }
 
   console.log(`Seeding finished.`);
-  console.log({
-    createdTags,
-    createdUsers,
-    // createdPairs,
-    // createdMatched,
-  });
 };
 
 main()

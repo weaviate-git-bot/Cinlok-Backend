@@ -15,7 +15,8 @@
     "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx,.vue src --fix"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "seed:prod": "ts-node prisma/seed-prod.ts"
   },
   "keywords": [],
   "author": "",

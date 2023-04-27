@@ -87,14 +87,22 @@ class ChatUseCase {
         ],
       },
       include: {
-        user1: true,
-        user2: true,
+        user1: {
+          include: {
+            userPhoto: true,
+          }
+        },
+        user2: {
+          include: {
+            userPhoto: true,
+          }
+        },
         messages: {
           orderBy: {
             timestamp: "desc",
           },
           take: 1,
-        }
+        },
       },
     });
 
