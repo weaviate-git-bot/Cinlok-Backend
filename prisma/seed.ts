@@ -1,6 +1,7 @@
 import { PrismaClient, SexType, Tag, Role } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
+import UseCaseUser from "../src/usecase/user";
 
 const prisma = new PrismaClient();
 
@@ -43,6 +44,7 @@ const clearDB = () => {
     prisma.university.deleteMany({}),
     prisma.userChannel.deleteMany({}),
     prisma.channel.deleteMany({}),
+    prisma.accountToken.deleteMany({}),
   ]);
 }
 
@@ -311,6 +313,7 @@ const main = async () => {
 
 main()
   .then(async () => {
+    await UseCaseUser.mixerSync();
     await prisma.$disconnect();
   })
   .catch(async (e) => {

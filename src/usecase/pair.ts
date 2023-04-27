@@ -111,6 +111,7 @@ class PairUseCase {
       }
     });
     if (!user || !user.university) return [];
+    omit.push(user.id);
 
     const nearest = await MixerService.getNearest(userId, n, omit, user.university.channel.name);
 

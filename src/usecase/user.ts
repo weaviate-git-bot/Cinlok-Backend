@@ -258,6 +258,7 @@ class UserUseCase {
       return acc;
     }, [] as any[]);
 
+    await this.ctx.mixer.clearChannel();
     await this.ctx.mixer.upsertBatch(mixerUser);
   }
 }
