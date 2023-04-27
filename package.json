@@ -10,7 +10,7 @@
     "initvdb": "ts-node src/command/weaviate-schema.ts",
     "start": "node dist/server.js",
     "server-start": "pnpm initvdb && pnpm start",
-    "test": "jest",
+    "test": "jest --coverage --verbose",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.vue src",
     "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx,.vue src --fix"
   },
