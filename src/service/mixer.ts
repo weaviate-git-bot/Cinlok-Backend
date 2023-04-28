@@ -104,7 +104,7 @@ const upsertBatch = async (users: UserMixer[]) => {
   }
 
   const data = users.map(async user => {
-    if (!user.userChannel[0]) return null;
+    if (!user.userChannel || !user.userChannel[0]) return null;
     return upsertUser(user, user.userTag.map(tag => tag.tag.tag), user.userChannel[0].channel.name);
   });
 
