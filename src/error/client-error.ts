@@ -11,3 +11,9 @@ export class NotFoundError extends BaseError {
     super(404, "Not Found" + (message ? `: ${message}` : ""));
   }
 }
+
+export class ForbiddenError extends BaseError {
+  constructor(message = "") {
+    super(403, "Forbidden" + (message ? `: ${message}` : ""));
+  }
+}

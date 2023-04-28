@@ -1,4 +1,5 @@
 import context, { IContext } from "../context";
+import { ForbiddenError } from "../error/client-error";
 import MixerService from "../service/mixer";
 import { GDate } from "../utils";
 import matchUseCase from "./match";
@@ -73,6 +74,34 @@ class PairUseCase {
   }
 
   async get(userId: number, n = 10) {
+    const user = await this.ctx.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        university: {
+          include: {
+            channel: true,
+          }
+        },
+        userTag: {
+          include: {
+            tag: true
+          }
+        },
+        userChannel: {
+          include: {
+            channel: true
+          }
+        }
+      }
+    });
+    if (!user || !user.university) return [];
+
+    if (!user.name) {
+      throw new ForbiddenError("You must set your profile first");
+    }
+
     const oldPairs = await this.ctx.prisma.pair.findMany({
       where: {
         userId,
@@ -97,30 +126,6 @@ class PairUseCase {
         (k) => GDate.instance.now().getTime() - (PairCache[userId])![k]!.getTime() < PAIR_REFRESH_TIME
       )
     );
-
-    const user = await this.ctx.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        university: {
-          include: {
-            channel: true,
-          }
-        },
-        userTag: {
-          include: {
-            tag: true
-          }
-        },
-        userChannel: {
-          include: {
-            channel: true
-          }
-        }
-      }
-    });
-    if (!user || !user.university) return [];
     omit.push(user.id);
 
     const nearest = await MixerService.getNearest(user, n, omit, user.university.channel.name);
