@@ -29,9 +29,6 @@ const generatedUniversity = [
   "Bogor Agricultural University",
   "Diponegoro University",
   "Padjadjaran University",
-  "Airlangga University",
-  "Brawijaya University",
-  "Hasanuddin University",
 ];
 
 const generateUser = async (name: string, username: string, password: string, sex: SexType, universitySlug?: string) => {
@@ -110,7 +107,7 @@ const main = async () => {
   );
 
   const generatedUsers = IS_DEVELOPMENT ? await Promise.all(
-    Array(20)
+    Array(500)
       .fill({})
       .map(async () => {
         const sex = Math.random() > 0.5 ? SexType.MALE : SexType.FEMALE;
@@ -137,7 +134,7 @@ const main = async () => {
           profileUrl: faker.image.imageUrl(),
           sex,
           photos,
-          universitySlug: generatedUniversity[Math.floor(Math.random() * generatedUniversity.length)] as string | undefined,
+          universitySlug: createdUniversity[Math.floor(Math.random() * createdUniversity.length)].slug as string | undefined,
         };
       })
   ) : [];
@@ -262,6 +259,8 @@ const main = async () => {
         userId1: user1.id,
         userId2: user2.id,
         timestamp: new Date(),
+        lastReadUser1: new Date(),
+        lastReadUser2: new Date(),
       },
     })
 

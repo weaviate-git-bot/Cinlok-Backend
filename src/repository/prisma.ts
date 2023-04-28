@@ -31,7 +31,7 @@ prisma.$use(async (params, next) => {
     });
 
     const mixerUser = users.map((user) => {
-      if (!user.userChannel || !user.userChannel[0]) {
+      if (!user?.userChannel[0]) {
         return null;
       }
       return {

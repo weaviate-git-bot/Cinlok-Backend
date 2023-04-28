@@ -10,7 +10,11 @@ type UserMixer = User & {
   })[];
 }
 
-const upsertUser = async (user: UserMixer, words: string[], channel: string) => {
+const upsertUser = async (user: UserMixer, words: string[], channel: string | null) => {
+  if (!channel) {
+    return null;
+  }
+  
   // To avoid 0 sized array
   if (!words.includes("person")) {
     words.push("person");
@@ -30,7 +34,10 @@ const upsertUser = async (user: UserMixer, words: string[], channel: string) => 
   return data;
 };
 
-const getNearest = async (user: UserMixer, n: number, omit: number[], channel: string) => {
+const getNearest = async (user: UserMixer, n: number, omit: number[], channel: string | null) => {
+  if (!channel) {
+    return [];
+  }
   const userData = await weaviate.graphql
     .get()
     .withClassName("Person")
@@ -104,8 +111,8 @@ const upsertBatch = async (users: UserMixer[]) => {
   }
 
   const data = users.map(async user => {
-    if (!user.userChannel || !user.userChannel[0]) return null;
-    return upsertUser(user, user.userTag.map(tag => tag.tag.tag), user.userChannel[0].channel.name);
+    if (!user?.userChannel?.[0]) return null;
+    return upsertUser(user, user.userTag.map(tag => tag.tag.tag), user.universitySlug);
   });
 
   return data;
