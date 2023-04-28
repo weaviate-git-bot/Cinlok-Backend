@@ -1,7 +1,7 @@
 import { IMockContext, createMockContext } from "../../context";
-import type { IContext } from "../../../src/context";
-import { MatchUseCase } from "../../../src/usecase/match";
-import { GDate } from "../../../src/utils";
+import type { IContext } from "../../../../src/context";
+import { MatchUseCase } from "../../../../src/usecase/match";
+import { GDate } from "../../../../src/utils";
 import type { Match } from "@prisma/client";
 
 let mockCtx: IMockContext;

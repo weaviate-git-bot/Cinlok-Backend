@@ -1,10 +1,10 @@
 import { IMockContext, createMockContext } from "../../context";
-import type { IContext } from "../../../src/context";
-import { AccountUseCase } from "../../../src/usecase/account";
+import type { IContext } from "../../../../src/context";
+import { AccountUseCase } from "../../../../src/usecase/account";
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { LoginError } from "../../../src/error";
-import jwt from "../../../src/lib/jwt";
+import { LoginError } from "../../../../src/error";
+import jwt from "../../../../src/lib/jwt";
 
 let mockCtx: IMockContext;
 let ctx: IContext;
