@@ -10,6 +10,10 @@ const personClass = {
       dataType: ["string"],
     },
     {
+      name: "sex",
+      dataType: ["string"],
+    },
+    {
       name: "tags",
       dataType: ["string"],
     },

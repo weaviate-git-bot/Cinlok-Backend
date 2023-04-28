@@ -84,7 +84,11 @@ class UserUseCase {
             email: true,
           }
         },
-        userTag: true,
+        userTag: {
+          include: {
+            tag: true,
+          }
+        },
         userChannel: {
           include: {
             channel: true,
@@ -123,7 +127,7 @@ class UserUseCase {
 
       // Update vector in mixer service
       for (const channel of user.userChannel) {
-        this.ctx.mixer.upsertUser(`${id}`, validTags.map((tag) => tag.tag), channel.channel.name);
+        this.ctx.mixer.upsertUser(user, validTags.map((tag) => tag.tag), channel.channel.name);
       }
     }
 
@@ -242,24 +246,24 @@ class UserUseCase {
       }
     });
 
-    const mixerUser = users.map((user) => {
-      if (!user.userChannel[0]) {
-        return null;
-      }
-      return {
-        id: `${user.id}`,
-        words: user.userTag.map((userTag) => userTag.tag.tag),
-        channel: user.userChannel[0].channel.name,
-      };
-    }).reduce((acc, cur) => {
-      if (cur) {
-        acc.push(cur);
-      }
-      return acc;
-    }, [] as any[]);
+    // const mixerUser = users.map((user) => {
+    //   if (!user.userChannel[0]) {
+    //     return null;
+    //   }
+    //   return {
+    //     id: `${user.id}`,
+    //     words: user.userTag.map((userTag) => userTag.tag.tag),
+    //     channel: user.userChannel[0].channel.name,
+    //   };
+    // }).reduce((acc, cur) => {
+    //   if (cur) {
+    //     acc.push(cur);
+    //   }
+    //   return acc;
+    // }, [] as any[]);
 
     await this.ctx.mixer.clearChannel();
-    await this.ctx.mixer.upsertBatch(mixerUser);
+    await this.ctx.mixer.upsertBatch(users);
   }
 }
 

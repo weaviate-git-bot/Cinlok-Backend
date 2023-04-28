@@ -107,13 +107,23 @@ class PairUseCase {
           include: {
             channel: true,
           }
+        },
+        userTag: {
+          include: {
+            tag: true
+          }
+        },
+        userChannel: {
+          include: {
+            channel: true
+          }
         }
       }
     });
     if (!user || !user.university) return [];
     omit.push(user.id);
 
-    const nearest = await MixerService.getNearest(userId, n, omit, user.university.channel.name);
+    const nearest = await MixerService.getNearest(user, n, omit, user.university.channel.name);
 
     const users = await this.ctx.prisma.user.findMany({
       where: {
@@ -146,6 +156,7 @@ class PairUseCase {
       id: u.id,
       name: u.name,
       age: Math.floor((time - u.dateOfBirth.getTime()) / 3.15576e+10),
+      sex: u.sex,
       university: u.university ? u.university.name : "",
       distance: distanceLatLong(user.latitude, user.longitude, u.latitude, u.longitude),
       userPhoto: u.userPhoto.map((p) => p.fileId),
