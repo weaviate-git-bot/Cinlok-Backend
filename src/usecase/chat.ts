@@ -239,8 +239,16 @@ class ChatUseCase {
         ],
       },
       include: {
-        user1: true,
-        user2: true,
+        user1: {
+          include: {
+            userPhoto: true,
+          }
+        },
+        user2: {
+          include: {
+            userPhoto: true,
+          }
+        },
       },
       orderBy: {
         timestamp: "desc",
