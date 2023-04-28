@@ -126,9 +126,7 @@ class UserUseCase {
       });
 
       // Update vector in mixer service
-      for (const channel of user.userChannel) {
-        this.ctx.mixer.upsertUser(user, validTags.map((tag) => tag.tag), channel.channel.name);
-      }
+      this.ctx.mixer.upsertUser(user, validTags.map((tag) => tag.tag), user.universitySlug);
     }
 
 

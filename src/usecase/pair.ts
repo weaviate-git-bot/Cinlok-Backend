@@ -128,7 +128,7 @@ class PairUseCase {
     );
     omit.push(user.id);
 
-    const nearest = await MixerService.getNearest(user, n, omit, user.university.channel.name);
+    const nearest = await MixerService.getNearest(user, n, omit, user.universitySlug);
 
     const users = await this.ctx.prisma.user.findMany({
       where: {
