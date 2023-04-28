@@ -96,7 +96,8 @@ test("should create match and update pair successfully", async () => {
     userId1: accReq.userId,
     userId2: accReq.pairedId,
     timestamp: curDate,
-    unreadCount: 0,
+    lastReadUser1: curDate,
+    lastReadUser2: curDate,
   };
   mockCtx.prisma.match.create.mockResolvedValue(match);
 
