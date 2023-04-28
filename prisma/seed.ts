@@ -145,6 +145,49 @@ const main = async () => {
   const generatedUser3 = await generateUser("User 3", "user3", "user3", SexType.MALE, createdUniversity[0].slug);
   generatedUsers.push(admin , generatedUser1, generatedUser2, generatedUser3);
 
+  const user1Pass = "user1";
+  const user1Salt = await bcrypt.genSalt(10);
+  const user1Hash = await bcrypt.hash(user1Pass, user1Salt);
+
+  const user2Pass = "user1";
+  const user2Salt = await bcrypt.genSalt(10);
+  const user2Hash = await bcrypt.hash(user2Pass, user2Salt);
+
+  const fixUsers = [
+    {
+      email: "user1@gmail.com",
+      username: "user1",
+      password: user1Hash,
+      salt: user1Salt,
+      name: "User1",
+      description: "User1",
+      dateOfBirth: faker.date.birthdate(),
+      latitude: faker.address.latitude(),
+      longitude: faker.address.longitude(),
+      profileUrl: faker.image.imageUrl(),
+      sex: SexType.MALE,
+      photos: [],
+      universitySlug: generatedUniversity[0],
+    },
+    {
+      email: "user2@gmail.com",
+      username: "user2",
+      password: user2Hash,
+      salt: user2Salt,
+      name: "User2",
+      description: "User2",
+      dateOfBirth: faker.date.birthdate(),
+      latitude: faker.address.latitude(),
+      longitude: faker.address.longitude(),
+      profileUrl: faker.image.imageUrl(),
+      sex: SexType.FEMALE,
+      photos: [],
+      universitySlug: generatedUniversity[0],
+    }
+  ]
+
+  generatedUsers.push(...fixUsers);
+
   const createdUsers = await Promise.all(
     generatedUsers.map(async (u) => {
       console.log(`Creating user: ${u.username}`);

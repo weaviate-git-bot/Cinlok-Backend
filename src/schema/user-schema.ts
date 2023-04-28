@@ -14,6 +14,11 @@ export const updateProfileSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
+export const updateLocationSchema = z.object({
+  latitude: z.number(),
+  longitude: z.number(),
+});
+
 export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>
 
 // Key format "photo_{i}" i is 0 to 3 (inclusive)

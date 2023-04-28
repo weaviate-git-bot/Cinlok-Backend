@@ -8,6 +8,7 @@ const UserRoute = Router();
 UserRoute.get("/profile/self", AuthMiddleware, userController.getSelfProfile);
 UserRoute.get("/profile", AuthMiddleware, userController.getProfile);
 UserRoute.put("/profile", AuthMiddleware, userController.updateProfile);
+UserRoute.put("/location", AuthMiddleware, userController.updateLocation);
 UserRoute.put("/profile/photo", AuthMiddleware, upload.fields(
   [
     { name: "photo_0", maxCount: 1 },
