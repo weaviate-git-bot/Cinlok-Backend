@@ -106,15 +106,30 @@ class ChatUseCase {
       },
     });
 
+    const resChats = await Promise.all(chats.map(async (chat) => {
+      const unreadCount = await this.ctx.prisma.message.count({
+        where: {
+          matchId: chat.id,
+          timestamp: {
+            gt: chat.userId1 === accountId ? chat.lastReadUser1 : chat.lastReadUser2,
+          }
+        },
+      });
+      return {
+        ...chat,
+        unreadCount,
+      };
+    }));
+
     // Sort chats by last message timestamp
-    chats.sort((a, b) => {
-      const aTimestamp = a.messages[0]?.timestamp.getTime() || 0;
-      const bTimestamp = b.messages[0]?.timestamp.getTime() || 0;
+    resChats.sort((a, b) => {
+      const aTimestamp = a.messages[0]?.timestamp.getTime() || a.timestamp.getTime();
+      const bTimestamp = b.messages[0]?.timestamp.getTime() || b.timestamp.getTime();
       return bTimestamp - aTimestamp;
     });
 
     // Swaps the user1 and user2 if the user is user2
-    chats.forEach((chat) => {
+    resChats.forEach((chat) => {
       if (chat.user2.id === accountId) {
         const temp = chat.user1;
         chat.user1 = chat.user2;
@@ -122,7 +137,7 @@ class ChatUseCase {
       }
     });
 
-    return chats;
+    return resChats;
   }
 
   async sendMessage(
@@ -241,6 +256,27 @@ class ChatUseCase {
         timestamp: "asc",
       },
     });
+
+    // Update last read
+    if (match.userId1 === accountId1) {
+      await this.ctx.prisma.match.update({
+        where: {
+          id: match.id,
+        },
+        data: {
+          lastReadUser1: new Date(),
+        },
+      });
+    } else {
+      await this.ctx.prisma.match.update({
+        where: {
+          id: match.id,
+        },
+        data: {
+          lastReadUser2: new Date(),
+        },
+      });
+    }
 
     // Swaps the user1 and user2 if the user is user2
     if (match.user2.id === accountId1) {

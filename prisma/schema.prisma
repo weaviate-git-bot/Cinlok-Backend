@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fieldReference"]
 }
 
 datasource db {
@@ -40,7 +41,7 @@ model User {
   match       Match[]       @relation("user1")
   matchedUser Match[]       @relation("user2")
   userChannel UserChannel[]
-  university  University?    @relation(fields: [universitySlug], references: [slug])
+  university  University?   @relation(fields: [universitySlug], references: [slug])
   Message     Message[]
 
   @@index([universitySlug])
@@ -112,11 +113,13 @@ model Pair {
 }
 
 model Match {
-  id          Int      @id @default(autoincrement())
-  userId1     Int
-  userId2     Int
-  timestamp   DateTime
-  unreadCount Int      @default(0)
+  id        Int      @id @default(autoincrement())
+  userId1   Int
+  userId2   Int
+  timestamp DateTime
+
+  lastReadUser1 DateTime @default(now())
+  lastReadUser2 DateTime @default(now())
 
   user1    User      @relation("user1", fields: [userId1], references: [id])
   user2    User      @relation("user2", fields: [userId2], references: [id])
