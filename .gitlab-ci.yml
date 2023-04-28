@@ -44,7 +44,7 @@ unit-test-job:   # This job runs in the test stage.
     - pnpm test
   artifacts:
     paths:
-      - coverage
+      - coverage/lcov.info
 
 lint-test-job:
   stage: test
