@@ -112,6 +112,9 @@ class ChatUseCase {
           matchId: chat.id,
           timestamp: {
             gt: chat.userId1 === accountId ? chat.lastReadUser1 : chat.lastReadUser2,
+          },
+          senderId: {
+            not: accountId,
           }
         },
       });
