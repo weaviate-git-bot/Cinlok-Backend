@@ -145,6 +145,9 @@ class PairUseCase {
         userPhoto: {
           select: {
             fileId: true,
+          },
+          orderBy: {
+            index: "asc",
           }
         },
         userTag: {
