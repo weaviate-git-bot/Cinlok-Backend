@@ -1,0 +1,6 @@
+projectKey=cinlok-app
+serverUrl=https://sonarqube.reefz.software
+serverVersion=10.0.0.68432
+dashboardUrl=https://sonarqube.reefz.software/dashboard?id=cinlok-app
+ceTaskId=AYfHlkt0tAXpq1m2j-Wp
+ceTaskUrl=https://sonarqube.reefz.software/api/ce/task?id=AYfHlkt0tAXpq1m2j-Wp

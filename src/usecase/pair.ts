@@ -166,6 +166,7 @@ class PairUseCase {
       distance: distanceLatLong(user.latitude, user.longitude, u.latitude, u.longitude),
       userPhoto: u.userPhoto.map((p) => p.fileId),
       userTag: u.userTag.map((t) => t.tag.tag),
+      description: u.description,
     }));
     return res;
   }
