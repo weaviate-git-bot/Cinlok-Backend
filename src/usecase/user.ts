@@ -12,6 +12,17 @@ class UserUseCase {
     this.ctx = context;
   }
 
+  async updateLocation(id: number, latitude: number, longitude: number) {
+    const user = await this.ctx.prisma.user.update({
+      where: { id },
+      data: {
+        latitude,
+        longitude,
+      },
+    });
+    return user;
+  }
+
   async getAll(): Promise<User[]> {
     const users = await this.ctx.prisma.user.findMany({
       include: {
