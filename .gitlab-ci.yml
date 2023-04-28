@@ -34,12 +34,17 @@ sonarqube-check:
   allow_failure: true
   rules:
     - if: $CI_COMMIT_BRANCH == 'main'
+  dependencies:
+    - unit-test-job
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   extends: .use_pnpm
   script:
     - pnpm test
+  artifacts:
+    paths:
+      - coverage
 
 lint-test-job:
   stage: test
